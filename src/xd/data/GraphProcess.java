@@ -10,20 +10,26 @@ import java.util.*;
  * @author Qian Shaofeng
  * @created on 2017/3/4.
  */
-public class DataProcess {
+public class GraphProcess {
     private Graph graph;
     private List datalist;
 
-    public DataProcess(Graph graph){
+    public GraphProcess(Graph graph){
         this.graph = graph;
     }
 
+    public Graph updateGraph(){
+        dataStatistic();
+        dataSort();
+        addEdgesOfVertex();
+        return graph;
+    }
+
     /**
-     * 处理网络拓扑图中的数据，统计各个节点的流量并进行排序，排序的结果保存在网络拓扑结构图中
+     * 处理网络拓扑图中的流量，统计每个节点的流量数据
      *
-     * @return 更新流量信息的网络拓扑图
      */
-    public Graph dataStatistic(){
+    private void dataStatistic(){
         List<NetworkVertex> networkVertexList = graph.getNetworkVertices();
         List<Edge> edgelist = graph.getEdges();
 
@@ -34,13 +40,13 @@ public class DataProcess {
             networkVertexList.get(edge.w).data += edge.weight;
         }
 
-        dataSort();
-
-        return graph;
     }
 
-
+    /**
+     * 初始化graph中的table，统计每个节点的相邻边
+     */
     public void addEdgesOfVertex(){
+        graph.table = new Graph.Node[graph.networkVertexnum];
         List<Edge> edgeList = graph.getEdges();
         for (int i=0; i < graph.edgenum; ++i){
             graph.add(edgeList.get(i).v, edgeList.get(i));

@@ -3,12 +3,23 @@ package xd.graph;
 import java.util.Comparator;
 
 /**
+ * 该类是所有节点的基类，包含节点id和数据流量信息
+ * 其实现了Comparable接口，方便通过流量的大小进行
+ * 排序。
+ *
  * @author Qian Shaofeng
  * @created on 2017/3/4.
  */
 public abstract class Vertex implements Comparable<Vertex>{
 
+    /**
+     * 节点的id号
+     */
     public int id;
+
+    /**
+     * 节点的流量大小
+     */
     public int data;
 
     /**

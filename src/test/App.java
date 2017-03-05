@@ -1,7 +1,8 @@
 package test;
 
 import org.junit.Test;
-import xd.data.DataProcess;
+import xd.data.ServerPoint;
+import xd.data.GraphProcess;
 import xd.graph.Graph;
 import xd.graph.NetworkVertex;
 import xd.utils.FileUtils;
@@ -14,10 +15,20 @@ import java.util.List;
  */
 public class App {
     Graph graph = FileUtils.readFile();
+
+    @Test
+    public void serverPointsTest(){
+        GraphProcess graphProcess = new GraphProcess(graph);
+        graphProcess.updateGraph();
+        ServerPoint serverPoint = new ServerPoint(graph);
+        serverPoint.getServerIds(0, graph.networkVertexnum);
+        for (int i=0; i < graph.serverIds.size(); ++i)
+            System.out.println(graph.getNetworkVertices().get(graph.serverIds.get(i)).data);
+    }
     @Test
     public void dataStatisticTest(){
-        DataProcess dataProcess = new DataProcess(graph);
-        dataProcess.dataStatistic();
+        GraphProcess graphProcess = new GraphProcess(graph);
+        graphProcess.updateGraph();
         for (NetworkVertex list:graph.getNetworkVertices())
             System.out.println(list);
 
