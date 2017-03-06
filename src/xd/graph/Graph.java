@@ -91,8 +91,8 @@ public class Graph {
     }
 
     public class Node{
-        private Edge element;
-        private Node next;
+        public Edge element;
+        public Node next;
 
         public Node(Edge element, Node next){
             this.element = element;

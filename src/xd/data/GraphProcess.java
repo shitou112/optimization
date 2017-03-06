@@ -19,9 +19,14 @@ public class GraphProcess {
     }
 
     public Graph updateGraph(){
+
         dataStatistic();
-        dataSort();
+
         addEdgesOfVertex();
+        System.out.println(graph.getEdges().size());
+        deleteUselessVertex();
+        System.out.println(graph.getEdges().size());
+        dataSort();
         return graph;
     }
 
@@ -61,5 +66,28 @@ public class GraphProcess {
      */
     private void dataSort(){
         Collections.sort(graph.getNetworkVertices());
+    }
+
+    /**
+     * 删除图中无效边，例如不和消费节点相连的一条边节点
+     */
+    private void deleteUselessVertex(){
+        for (int i=0; i < graph.table.length; ++i) {
+            if (graph.table[i] != null) {
+                if (graph.table[i].next == null) {
+                    if (graph.table[i].element.v == i) {
+                        if (graph.getNetworkVertices().get(i).neighborId == -1) {
+                            graph.getEdges().remove(graph.table[i].element);
+                            graph.table[i] = null;
+                        }
+                    } else if (graph.table[i].element.w == i) {
+                        if (graph.getNetworkVertices().get(i).neighborId == -1) {
+                            graph.getEdges().remove(graph.table[i].element);
+                            graph.table[i] = null;
+                        }
+                    }
+                }
+            }
+        }
     }
 }

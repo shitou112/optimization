@@ -6,7 +6,7 @@ package xd.graph;
  */
 public class UserVertex extends Vertex{
 
-    public int neighborId;
+
 
     public UserVertex(int id, int neighborId, int data){
         this.id = id;

@@ -18,6 +18,11 @@ public abstract class Vertex implements Comparable<Vertex>{
     public int id;
 
     /**
+     * 相邻节点（用户节点与之网络节点相邻的id 或 网络节点与之用户节点相邻的id号）
+     */
+    public int neighborId = -1;
+
+    /**
      * 节点的流量大小
      */
     public int data;

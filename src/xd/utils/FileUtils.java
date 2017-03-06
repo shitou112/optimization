@@ -73,24 +73,33 @@ public class FileUtils {
             //读取空行
             br.readLine();
 
-            //读取消费节点
-            UserVertex userVertex;
-            for (int i = 0; i < graph.userVertexnums; ++i){
-                str = br.readLine();
-                strs = str.split(" ");
-                userVertex = new UserVertex(Integer.valueOf(strs[0]), Integer.valueOf(strs[1]),
-                        Integer.valueOf(strs[2]));
-                userVextexList.add(userVertex);
-            }
-            graph.setUserVertexs(userVextexList);
-
-            //构造网络链路节点方便计算流量
+            //构造网络链路节点
             NetworkVertex networkVertex;
             for (int i = 0; i < graph.networkVertexnum; ++i){
                 networkVertex = new NetworkVertex(i);
                 networkVertexList.add(networkVertex);
             }
             graph.setNetworkVertices(networkVertexList);
+            //读取消费节点
+            UserVertex userVertex;
+            int userId = 0,neighborId = 0;
+            for (int i = 0; i < graph.userVertexnums; ++i){
+                str = br.readLine();
+                strs = str.split(" ");
+
+                userId = Integer.valueOf(strs[0]);
+                neighborId = Integer.valueOf(strs[1]);
+                userVertex = new UserVertex(userId, neighborId,
+                        Integer.valueOf(strs[2]));
+
+                //为网络节点添加相邻的用户节点id号
+                networkVertexList.get(neighborId).neighborId = userId;
+
+                userVextexList.add(userVertex);
+            }
+            graph.setUserVertexs(userVextexList);
+
+
 
             br.close();
         }catch (IOException e){
