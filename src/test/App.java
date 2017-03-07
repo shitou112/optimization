@@ -24,8 +24,8 @@ public class App {
         GraphProcess graphProcess = new GraphProcess(graph);
         graphProcess.updateGraph();
         BreadthFirstPaths breadthFirstPaths = new BreadthFirstPaths(graph);
-        breadthFirstPaths.searchPath(0,6,3);
-        System.out.println(graph.table[0].get(6));
+
+        System.out.println(breadthFirstPaths.searchPath(0,43,3));
     }
 
     @Test

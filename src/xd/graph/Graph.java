@@ -126,9 +126,7 @@ public class Graph {
             this.element = element;
             path.add(nextId);
         }
-        public Node(){
 
-        }
 
         @Override
         public String toString() {
