@@ -27,6 +27,8 @@ public abstract class Vertex implements Comparable<Vertex>{
      */
     public int data;
 
+    public boolean marked;
+
     /**
      * 逆序比较，大的在前，小的后
      *

@@ -1,12 +1,15 @@
 package test;
 
 import org.junit.Test;
+import xd.algorithm.BreadthFirstPaths;
 import xd.data.ServerPoint;
 import xd.data.GraphProcess;
 import xd.graph.Graph;
 import xd.graph.NetworkVertex;
 import xd.utils.FileUtils;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -15,6 +18,36 @@ import java.util.List;
  */
 public class App {
     Graph graph = FileUtils.readFile();
+
+    @Test
+    public void searchPathTest(){
+        GraphProcess graphProcess = new GraphProcess(graph);
+        graphProcess.updateGraph();
+        BreadthFirstPaths breadthFirstPaths = new BreadthFirstPaths(graph);
+        breadthFirstPaths.searchPath(0,6,3);
+        System.out.println(graph.table[0].get(6));
+    }
+
+    @Test
+    public void deleteUselessVertexTest(){
+        GraphProcess graphProcess = new GraphProcess(graph);
+
+        System.out.println(graph.getEdges().size());
+        graphProcess.updateGraph();
+        System.out.println(graph.getEdges().size());
+
+    }
+
+    @Test
+    public void createVerticsTableTest(){
+        GraphProcess graphProcess = new GraphProcess(graph);
+        graphProcess.updateGraph();
+        for (int i=0; i < graph.networkVertexnum; ++i){
+            for (int j=0; j < graph.networkVertexnum; ++j){
+                System.out.println(i+"---"+graph.adj[i][j]);
+            }
+        }
+    }
 
     @Test
     public void serverPointsTest(){

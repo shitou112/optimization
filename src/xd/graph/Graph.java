@@ -1,5 +1,8 @@
 package xd.graph;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -31,7 +34,13 @@ public class Graph {
      * table是节点数组，每一个元素中存储着与该节点相邻边的信息，
      * 其每个数组元素中存放的是一个边的链表
      */
-    public Node[] table;
+    public HashMap<Integer, Node>[] table;
+
+    /**
+     * 邻接节点表用二维数组表示
+     */
+    public VertexInfo[][] adj;
+
 
     /**
      * 部署服务器的节点id
@@ -81,22 +90,49 @@ public class Graph {
     /**
      * 向id号顶点中添加一条链路边
      *
-     * @param id 顶点号
+     * @param firstId 当前节点id号
+     * @param nextVertexId 下个节点的id号
+     * @param minCost 当前节点到下节点边的最小花费
      * @param edge 添加的链路边
      */
-    public void add(int id, Edge edge){
-        Node node = table[id];
-        table[id] = new Node(edge,node);
+    public void add(int firstId, int nextVertexId, int minCost, Edge edge){
+        if (table[firstId] == null)
+            table[firstId] = new HashMap<>();
+        table[firstId].put(nextVertexId,new Node(nextVertexId ,minCost, edge));
 
     }
 
-    public class Node{
-        public Edge element;
-        public Node next;
+    public class VertexInfo{
+        public int id;
+        public Edge edge;
+        public VertexInfo(int id, Edge edge){
+            this.id = id;
+            this.edge = edge;
+        }
 
-        public Node(Edge element, Node next){
+        @Override
+        public String toString() {
+            return "id:"+id+"---"+"edge:"+edge;
+        }
+    }
+
+    public class Node{
+
+        public Edge element;
+        public int minCost;
+        public List<Integer> path = new LinkedList<>();
+        public Node(int nextId,int minCost, Edge element){
+            this.minCost = minCost;
             this.element = element;
-            this.next = next;
+            path.add(nextId);
+        }
+        public Node(){
+
+        }
+
+        @Override
+        public String toString() {
+            return minCost+"----"+path;
         }
     }
 }

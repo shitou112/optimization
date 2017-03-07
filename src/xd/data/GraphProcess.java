@@ -20,14 +20,36 @@ public class GraphProcess {
 
     public Graph updateGraph(){
 
+        //流量统计
         dataStatistic();
 
+        //添加相邻边
         addEdgesOfVertex();
-        System.out.println(graph.getEdges().size());
-        deleteUselessVertex();
-        System.out.println(graph.getEdges().size());
-        dataSort();
+
+        //删除无效节点
+//        deleteUselessVertex();
+
+        //创建节点邻接表
+//        createVerticesTable();
+//        dataSort();
         return graph;
+    }
+
+    /**
+     * 创建节点的邻接表
+     */
+    public void createVerticesTable(){
+        graph.adj = new Graph.VertexInfo[graph.networkVertexnum][graph.networkVertexnum];
+        for (Edge edge: graph.getEdges()){
+
+            Graph.VertexInfo vertexInfo = graph.new VertexInfo(edge.w, edge);
+            graph.adj[edge.v][edge.w] = vertexInfo;
+            graph.adj[edge.v][edge.w].edge = edge;
+
+            vertexInfo = graph.new VertexInfo(edge.v, edge);
+            graph.adj[edge.w][edge.v] = vertexInfo;
+
+        }
     }
 
     /**
@@ -39,7 +61,7 @@ public class GraphProcess {
         List<Edge> edgelist = graph.getEdges();
 
         Edge edge = null;
-        for (int i=0,id=0; i < graph.edgenum; ++i){
+        for (int i=0; i < graph.edgenum; ++i){
             edge = edgelist.get(i);
             networkVertexList.get(edge.v).data += edge.weight;
             networkVertexList.get(edge.w).data += edge.weight;
@@ -51,11 +73,10 @@ public class GraphProcess {
      * 初始化graph中的table，统计每个节点的相邻边
      */
     public void addEdgesOfVertex(){
-        graph.table = new Graph.Node[graph.networkVertexnum];
-        List<Edge> edgeList = graph.getEdges();
-        for (int i=0; i < graph.edgenum; ++i){
-            graph.add(edgeList.get(i).v, edgeList.get(i));
-            graph.add(edgeList.get(i).w, edgeList.get(i));
+        graph.table = new HashMap[graph.networkVertexnum];
+        for (Edge edge: graph.getEdges()){
+            graph.add(edge.v, edge.w, edge.money, edge);
+            graph.add(edge.w, edge.v, edge.money, edge);
         }
     }
 
@@ -71,23 +92,18 @@ public class GraphProcess {
     /**
      * 删除图中无效边，例如不和消费节点相连的一条边节点
      */
-    private void deleteUselessVertex(){
-        for (int i=0; i < graph.table.length; ++i) {
-            if (graph.table[i] != null) {
-                if (graph.table[i].next == null) {
-                    if (graph.table[i].element.v == i) {
-                        if (graph.getNetworkVertices().get(i).neighborId == -1) {
-                            graph.getEdges().remove(graph.table[i].element);
-                            graph.table[i] = null;
-                        }
-                    } else if (graph.table[i].element.w == i) {
-                        if (graph.getNetworkVertices().get(i).neighborId == -1) {
-                            graph.getEdges().remove(graph.table[i].element);
-                            graph.table[i] = null;
-                        }
-                    }
-                }
-            }
-        }
-    }
+//    private void deleteUselessVertex(){
+//        for (int i=0; i < graph.table.length; ++i) {
+//            if (graph.table[i] != null) {
+//                if (graph.table[i].size() == 1) {
+//                    if(graph.getNetworkVertices().get(graph.table[i].get(0).nextVertexId).neighborId == -1) {
+//                        System.out.println(graph.table[i].get(0).element);
+//                        graph.getEdges().remove(graph.table[i].get(0).element);
+//                        graph.table[i] = null;
+//                        --graph.edgenum;
+//                    }
+//                }
+//            }
+//        }
+//    }
 }
