@@ -1,6 +1,4 @@
-package xd.graph;
-
-import java.util.Comparator;
+package com.xd.graph;
 
 /**
  * 该类是所有节点的基类，包含节点id和数据流量信息

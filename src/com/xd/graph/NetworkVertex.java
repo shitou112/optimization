@@ -1,4 +1,4 @@
-package xd.graph;
+package com.xd.graph;
 
 /**
  * @author Qian Shaofeng

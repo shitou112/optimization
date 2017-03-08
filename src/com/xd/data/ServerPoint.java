@@ -1,6 +1,6 @@
-package xd.data;
+package com.xd.data;
 
-import xd.graph.Graph;
+import com.xd.graph.Graph;
 
 import java.util.ArrayList;
 import java.util.List;

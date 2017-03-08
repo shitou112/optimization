@@ -1,15 +1,14 @@
-package test;
+package com.test;
 
+import com.xd.algorithm.PQDijkstra;
 import org.junit.Test;
-import xd.algorithm.BreadthFirstPaths;
-import xd.data.ServerPoint;
-import xd.data.GraphProcess;
-import xd.graph.Graph;
-import xd.graph.NetworkVertex;
-import xd.utils.FileUtils;
+import com.xd.algorithm.BreadthFirstPaths;
+import com.xd.data.ServerPoint;
+import com.xd.data.GraphProcess;
+import com.xd.graph.Graph;
+import com.xd.graph.NetworkVertex;
+import com.xd.utils.FileUtils;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -23,9 +22,11 @@ public class App {
     public void searchPathTest(){
         GraphProcess graphProcess = new GraphProcess(graph);
         graphProcess.updateGraph();
-        BreadthFirstPaths breadthFirstPaths = new BreadthFirstPaths(graph);
+        PQDijkstra pqDijkstra = new PQDijkstra(graph, 1000);
+        List<Integer> list = pqDijkstra.searchPath(0,35);
+        for (Integer list1:list)
+            System.out.println(list1);
 
-        System.out.println(breadthFirstPaths.searchPath(0,43,3));
     }
 
     @Test

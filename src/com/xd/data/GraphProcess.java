@@ -1,8 +1,8 @@
-package xd.data;
+package com.xd.data;
 
-import xd.graph.Edge;
-import xd.graph.Graph;
-import xd.graph.NetworkVertex;
+import com.xd.graph.Edge;
+import com.xd.graph.Graph;
+import com.xd.graph.NetworkVertex;
 
 import java.util.*;
 

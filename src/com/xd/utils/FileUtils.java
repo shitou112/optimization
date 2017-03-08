@@ -1,9 +1,9 @@
-package xd.utils;
+package com.xd.utils;
 
-import xd.graph.Edge;
-import xd.graph.Graph;
-import xd.graph.NetworkVertex;
-import xd.graph.UserVertex;
+import com.xd.graph.Edge;
+import com.xd.graph.Graph;
+import com.xd.graph.NetworkVertex;
+import com.xd.graph.UserVertex;
 
 import java.io.BufferedReader;
 import java.io.File;
