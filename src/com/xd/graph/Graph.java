@@ -47,6 +47,11 @@ public class Graph {
     public List<Integer> serverIds;
 
     /**
+     * 与用户节点相邻的网络节点
+     */
+    public List<NetworkVertex> userAdjVertices;
+
+    /**
      * 网络拓扑图中存放边的集合
      */
     private List<Edge> edges;

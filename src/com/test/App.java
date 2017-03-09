@@ -1,6 +1,7 @@
 package com.test;
 
 import com.xd.algorithm.PQDijkstra;
+import com.xd.graph.Edge;
 import org.junit.Test;
 import com.xd.algorithm.BreadthFirstPaths;
 import com.xd.data.ServerPoint;
@@ -23,15 +24,32 @@ public class App {
     public void searchPathTest(){
         graph.serverIds = new ArrayList<>();
         graph.serverIds.add(35);
+//        graph.serverIds.add(16);
+//        graph.serverIds.add(17);
+//        graph.serverIds.add(9);
+//        graph.serverIds.add(3);
+//        graph.serverIds.add(26);
+
         GraphProcess graphProcess = new GraphProcess(graph);
         graphProcess.updateGraph();
         PQDijkstra pqDijkstra = new PQDijkstra(graph, 1000);
-        List<List> list = pqDijkstra.searchPath(0,6);
-        for (List<Integer> list1:list){
-            for (Integer integer:list1)
-                System.out.print(integer+" ");
-            System.out.println();
-        }
+        List<List> lists = pqDijkstra.searchPath(0, 0,38);
+            for (List<Integer> list1:lists){
+                for (Integer integer:list1){
+                    System.out.print(integer+" ");
+                }
+                System.out.println();
+            }
+//        for (NetworkVertex networkVertex:graph.userAdjVertices){
+//            List<List> lists = pqDijkstra.searchPath(networkVertex.id,networkVertex.userDatas);
+//            for (List<Integer> list1:lists){
+//                for (Integer integer:list1){
+//                    System.out.print(integer+" ");
+//                }
+//                System.out.println();
+//            }
+//        }
+
 
 
     }
@@ -75,6 +93,11 @@ public class App {
 
     }
 
+    @Test
+    public void userAdjVertices(){
+        for (NetworkVertex networkVertex: graph.userAdjVertices)
+            System.out.println(networkVertex);
+    }
     @Test
     public void filereadTest(){
         System.out.println(graph.networkVertexnum+" "+ graph.userVertexnums+" "+ graph.edgenum+" "+ graph.serverValue);

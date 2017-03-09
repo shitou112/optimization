@@ -6,7 +6,7 @@ package com.xd.graph;
  */
 public class NetworkVertex extends Vertex{
 
-
+    public Integer userDatas;
 
     public NetworkVertex(int id, int data){
         this.id = id;
@@ -16,10 +16,8 @@ public class NetworkVertex extends Vertex{
         this.id = id;
     }
 
-
-
-
-
-
-
+    @Override
+    public String toString() {
+        return "id:"+id+"---neighbor:"+neighborId+"---userdatas"+userDatas;
+    }
 }

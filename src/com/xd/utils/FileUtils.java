@@ -33,6 +33,7 @@ public class FileUtils {
 
             List<UserVertex> userVextexList = new ArrayList<>();
             List<NetworkVertex> networkVertexList = new ArrayList<>();
+            List<NetworkVertex> userAdjVertices = new ArrayList<>();
             List<Edge> edgeList = new ArrayList<>();
 
             String str;
@@ -82,15 +83,18 @@ public class FileUtils {
             graph.setNetworkVertices(networkVertexList);
             //读取消费节点
             UserVertex userVertex;
-            int userId = 0,neighborId = 0;
+            int userId = 0,neighborId = 0,userDatas = 0;
             for (int i = 0; i < graph.userVertexnums; ++i){
                 str = br.readLine();
                 strs = str.split(" ");
 
                 userId = Integer.valueOf(strs[0]);
                 neighborId = Integer.valueOf(strs[1]);
-                userVertex = new UserVertex(userId, neighborId,
-                        Integer.valueOf(strs[2]));
+                userDatas = Integer.valueOf(strs[2]);
+                userVertex = new UserVertex(userId, neighborId, userDatas);
+
+                networkVertexList.get(neighborId).userDatas = userDatas;
+                userAdjVertices.add(networkVertexList.get(neighborId));
 
                 //为网络节点添加相邻的用户节点id号
                 networkVertexList.get(neighborId).neighborId = userId;
@@ -98,6 +102,7 @@ public class FileUtils {
                 userVextexList.add(userVertex);
             }
             graph.setUserVertexs(userVextexList);
+            graph.userAdjVertices = userAdjVertices;
 
 
 
