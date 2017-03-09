@@ -20,35 +20,38 @@ import java.util.List;
 public class App {
     Graph graph = FileUtils.readFile();
 
+    /**
+     * 注意此测试中的寻找路径为空需要后续处理，例如添加服务器节点
+     */
     @Test
     public void searchPathTest(){
         graph.serverIds = new ArrayList<>();
         graph.serverIds.add(35);
-//        graph.serverIds.add(16);
-//        graph.serverIds.add(17);
-//        graph.serverIds.add(9);
-//        graph.serverIds.add(3);
-//        graph.serverIds.add(26);
+        graph.serverIds.add(16);
+        graph.serverIds.add(17);
+        graph.serverIds.add(9);
+        graph.serverIds.add(3);
+        graph.serverIds.add(26);
 
         GraphProcess graphProcess = new GraphProcess(graph);
         graphProcess.updateGraph();
         PQDijkstra pqDijkstra = new PQDijkstra(graph, 1000);
-        List<List> lists = pqDijkstra.searchPath(0, 0,38);
-            for (List<Integer> list1:lists){
-                for (Integer integer:list1){
-                    System.out.print(integer+" ");
-                }
-                System.out.println();
+
+        for (NetworkVertex networkVertex:graph.userAdjVertices){
+            List<List> lists = pqDijkstra.searchPath(networkVertex.id, networkVertex.neighborId,networkVertex.userDatas);
+            if (lists==null){
+                graph.serverIds.add(networkVertex.id);
+                System.out.println(networkVertex.id+"---"+networkVertex.neighborId+"---"+networkVertex.userDatas);
             }
-//        for (NetworkVertex networkVertex:graph.userAdjVertices){
-//            List<List> lists = pqDijkstra.searchPath(networkVertex.id,networkVertex.userDatas);
-//            for (List<Integer> list1:lists){
-//                for (Integer integer:list1){
-//                    System.out.print(integer+" ");
-//                }
-//                System.out.println();
-//            }
-//        }
+            else {
+                for (List<Integer> list1 : lists) {
+                    for (Integer integer : list1) {
+                        System.out.print(integer + " ");
+                    }
+                    System.out.println();
+                }
+            }
+        }
 
 
 
