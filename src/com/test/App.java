@@ -1,14 +1,13 @@
 package com.test;
 
+import com.filetool.util.FileUtil;
 import com.xd.algorithm.PQDijkstra;
-import com.xd.graph.Edge;
 import org.junit.Test;
-import com.xd.algorithm.BreadthFirstPaths;
 import com.xd.data.ServerPoint;
 import com.xd.data.GraphProcess;
 import com.xd.graph.Graph;
 import com.xd.graph.NetworkVertex;
-import com.xd.utils.FileUtils;
+import com.xd.myutils.StringsUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,13 +17,15 @@ import java.util.List;
  * @created on 2017/3/4.
  */
 public class App {
-    Graph graph = FileUtils.readFile();
+    String FILEPATH = "E:\\case_example\\case0.txt";
+    Graph graph = StringsUtils.readStrings(FileUtil.read(FILEPATH,null));
 
     /**
      * 注意此测试中的寻找路径为空需要后续处理，例如添加服务器节点
      */
     @Test
     public void searchPathTest(){
+        long start = System.currentTimeMillis();
         graph.serverIds = new ArrayList<>();
         graph.serverIds.add(35);
         graph.serverIds.add(16);
@@ -41,7 +42,7 @@ public class App {
             List<List> lists = pqDijkstra.searchPath(networkVertex.id, networkVertex.neighborId,networkVertex.userDatas);
             if (lists==null){
                 graph.serverIds.add(networkVertex.id);
-                System.out.println(networkVertex.id+"---"+networkVertex.neighborId+"---"+networkVertex.userDatas);
+//                System.out.println(networkVertex.id+"---"+networkVertex.neighborId+"---"+networkVertex.userDatas);
             }
             else {
                 for (List<Integer> list1 : lists) {
@@ -52,6 +53,10 @@ public class App {
                 }
             }
         }
+
+        long end = System.currentTimeMillis();
+
+        System.out.println(end - start);
 
 
 
