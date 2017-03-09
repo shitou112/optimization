@@ -9,6 +9,7 @@ import com.xd.graph.Graph;
 import com.xd.graph.NetworkVertex;
 import com.xd.utils.FileUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,12 +21,18 @@ public class App {
 
     @Test
     public void searchPathTest(){
+        graph.serverIds = new ArrayList<>();
+        graph.serverIds.add(35);
         GraphProcess graphProcess = new GraphProcess(graph);
         graphProcess.updateGraph();
         PQDijkstra pqDijkstra = new PQDijkstra(graph, 1000);
-        List<Integer> list = pqDijkstra.searchPath(0,35);
-        for (Integer list1:list)
-            System.out.println(list1);
+        List<List> list = pqDijkstra.searchPath(0,6);
+        for (List<Integer> list1:list){
+            for (Integer integer:list1)
+                System.out.print(integer+" ");
+            System.out.println();
+        }
+
 
     }
 
