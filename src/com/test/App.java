@@ -2,6 +2,7 @@ package com.test;
 
 import com.filetool.util.FileUtil;
 import com.xd.algorithm.PQDijkstra;
+import com.xd.graph.Edge;
 import org.junit.Test;
 import com.xd.data.ServerPoint;
 import com.xd.data.GraphProcess;
@@ -10,6 +11,7 @@ import com.xd.graph.NetworkVertex;
 import com.xd.myutils.StringsUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -20,12 +22,29 @@ public class App {
     String FILEPATH = "E:\\case_example\\case0.txt";
     Graph graph = StringsUtils.readStrings(FileUtil.read(FILEPATH,null));
 
-    /**
-     * 注意此测试中的寻找路径为空需要后续处理，例如添加服务器节点
-     */
     @Test
-    public void searchPathTest(){
-        long start = System.currentTimeMillis();
+    public void graphCloneTest() throws CloneNotSupportedException {
+        GraphProcess graphProcess = new GraphProcess(graph);
+        graphProcess.updateGraph();
+
+        HashMap<Integer, Graph.Node>[] newTable = new HashMap[graph.networkVertexnum];
+        HashMap<Integer, Graph.Node> hashMap;
+        List<Edge> newEdges = new ArrayList<>();
+        for (int i=0; i < graph.networkVertexnum; ++i){
+            if (graph.table[i] != null) {
+                hashMap = new HashMap<>();
+                for (Integer id : graph.table[i].keySet()) {
+                    hashMap.put(id, graph.new Node((Edge)graph.table[i].get(id).element.clone()));
+                }
+                newTable[i] = hashMap;
+            }
+            else {
+                newTable[i] = null;
+            }
+
+
+        }
+
         graph.serverIds = new ArrayList<>();
         graph.serverIds.add(35);
         graph.serverIds.add(16);
@@ -34,33 +53,69 @@ public class App {
         graph.serverIds.add(3);
         graph.serverIds.add(26);
 
-        GraphProcess graphProcess = new GraphProcess(graph);
-        graphProcess.updateGraph();
+
         PQDijkstra pqDijkstra = new PQDijkstra(graph, 1000);
 
-        for (NetworkVertex networkVertex:graph.userAdjVertices){
-            List<List> lists = pqDijkstra.searchPath(networkVertex.id, networkVertex.neighborId,networkVertex.userDatas);
-            if (lists==null){
-                graph.serverIds.add(networkVertex.id);
-//                System.out.println(networkVertex.id+"---"+networkVertex.neighborId+"---"+networkVertex.userDatas);
-            }
-            else {
-                for (List<Integer> list1 : lists) {
-                    for (Integer integer : list1) {
-                        System.out.print(integer + " ");
-                    }
-                    System.out.println();
-                }
-            }
+        int sum = pqDijkstra.searchGraphPaths(graph.userAdjVertices, newTable);
+
+
+//        for (List<Integer> list:pqDijkstra.getAllPathList()){
+//            for (Integer integer:list){
+//                System.out.print(integer+" ");
+//            }
+//            System.out.println();
+//        }
+//        System.out.println(sum);
+        for (Edge edge:graph.getEdges()){
+            System.out.println(edge);
         }
-
-        long end = System.currentTimeMillis();
-
-        System.out.println(end - start);
-
 
 
     }
+
+    /**
+     * 注意此测试中的寻找路径为空需要后续处理，例如添加服务器节点
+     */
+//    @Test
+//    public void searchPathTest(){
+//        long start = System.currentTimeMillis();
+//
+//        graph.serverIds = new ArrayList<>();
+//        graph.serverIds.add(35);
+//        graph.serverIds.add(16);
+//        graph.serverIds.add(17);
+//        graph.serverIds.add(9);
+//        graph.serverIds.add(3);
+//        graph.serverIds.add(26);
+//
+//        GraphProcess graphProcess = new GraphProcess(graph);
+//        graphProcess.updateGraph();
+//        PQDijkstra pqDijkstra = new PQDijkstra(graph, 1000);
+//
+//        for (NetworkVertex networkVertex:graph.userAdjVertices){
+//            List<List> lists = pqDijkstra.searchPath(networkVertex.id, networkVertex.neighborId,networkVertex.userDatas, );
+//            if (lists==null){
+//                graph.serverIds.add(networkVertex.id);
+////                System.out.println(networkVertex.id+"---"+networkVertex.neighborId+"---"+networkVertex.userDatas);
+//            }
+//            else {
+//                for (List<Integer> list1 : lists) {
+//                    for (Integer integer : list1) {
+//                        System.out.print(integer + " ");
+//                    }
+//                    System.out.println();
+//                }
+//            }
+//        }
+//
+//        long end = System.currentTimeMillis();
+//
+//        System.out.println(end - start);
+//
+//
+//
+//
+//    }
 
     @Test
     public void deleteUselessVertexTest(){
@@ -74,13 +129,13 @@ public class App {
 
     @Test
     public void createVerticsTableTest(){
-        GraphProcess graphProcess = new GraphProcess(graph);
-        graphProcess.updateGraph();
-        for (int i=0; i < graph.networkVertexnum; ++i){
-            for (int j=0; j < graph.networkVertexnum; ++j){
-                System.out.println(i+"---"+graph.adj[i][j]);
-            }
-        }
+//        GraphProcess graphProcess = new GraphProcess(graph);
+//        graphProcess.updateGraph();
+//        for (int i=0; i < graph.networkVertexnum; ++i){
+//            for (int j=0; j < graph.networkVertexnum; ++j){
+//                System.out.println(i+"---"+graph.adj[i][j]);
+//            }
+//        }
     }
 
     @Test

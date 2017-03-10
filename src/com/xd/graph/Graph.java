@@ -8,7 +8,7 @@ import java.util.List;
  * @author Qian Shaofeng
  * @created on 2017/3/4.
  */
-public class Graph {
+public class Graph implements Cloneable{
     /**
      * 网络拓扑图中边的数量
      */
@@ -34,11 +34,6 @@ public class Graph {
      * 其每个数组元素中存放的是一个边的链表
      */
     public HashMap<Integer, Node>[] table;
-
-    /**
-     * 邻接节点表用二维数组表示
-     */
-    public VertexInfo[][] adj;
 
 
     /**
@@ -91,6 +86,11 @@ public class Graph {
         return userVertexs;
     }
 
+
+
+    public Graph(){
+
+    }
     /**
      * 向id号顶点中添加一条链路边
      *
@@ -102,39 +102,34 @@ public class Graph {
     public void add(int firstId, int nextVertexId, int minCost, Edge edge){
         if (table[firstId] == null)
             table[firstId] = new HashMap<>();
-        table[firstId].put(nextVertexId,new Node(nextVertexId ,minCost, edge));
+        table[firstId].put(nextVertexId,new Node(edge));
 
     }
 
-    public class VertexInfo{
-        public int id;
-        public Edge edge;
-        public VertexInfo(int id, Edge edge){
-            this.id = id;
-            this.edge = edge;
-        }
 
-        @Override
-        public String toString() {
-            return "id:"+id+"---"+"edge:"+edge;
-        }
-    }
-
-    public class Node{
+    public class Node implements Cloneable{
 
         public Edge element;
-        public int minCost;
-        public List<Integer> path = new LinkedList<>();
-        public Node(int nextId,int minCost, Edge element){
-            this.minCost = minCost;
+
+        public Node(Edge element){
             this.element = element;
-            path.add(nextId);
         }
 
 
         @Override
         public String toString() {
-            return minCost+"----"+path;
+            return element+"---";
+        }
+
+        @Override
+        public Object clone() throws CloneNotSupportedException {
+            Node node = new Node(element);
+            return node;
         }
     }
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+
 }

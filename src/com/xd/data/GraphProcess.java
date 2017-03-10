@@ -38,19 +38,19 @@ public class GraphProcess {
     /**
      * 创建节点的邻接表
      */
-    public void createVerticesTable(){
-        graph.adj = new Graph.VertexInfo[graph.networkVertexnum][graph.networkVertexnum];
-        for (Edge edge: graph.getEdges()){
-
-            Graph.VertexInfo vertexInfo = graph.new VertexInfo(edge.w, edge);
-            graph.adj[edge.v][edge.w] = vertexInfo;
-            graph.adj[edge.v][edge.w].edge = edge;
-
-            vertexInfo = graph.new VertexInfo(edge.v, edge);
-            graph.adj[edge.w][edge.v] = vertexInfo;
-
-        }
-    }
+//    public void createVerticesTable(){
+//        graph.adj = new Graph.VertexInfo[graph.networkVertexnum][graph.networkVertexnum];
+//        for (Edge edge: graph.getEdges()){
+//
+//            Graph.VertexInfo vertexInfo = graph.new VertexInfo(edge.w, edge);
+//            graph.adj[edge.v][edge.w] = vertexInfo;
+//            graph.adj[edge.v][edge.w].edge = edge;
+//
+//            vertexInfo = graph.new VertexInfo(edge.v, edge);
+//            graph.adj[edge.w][edge.v] = vertexInfo;
+//
+//        }
+//    }
 
     /**
      * 处理网络拓扑图中的流量，统计每个节点的流量数据
