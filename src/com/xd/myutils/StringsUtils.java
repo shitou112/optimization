@@ -103,5 +103,23 @@ public class StringsUtils {
         return graph;
     }
 
+    public static String[] ListT0Strings(List<List> lists){
+        int i=0;
+        StringBuilder sb;
+        List<Integer> list = null;
+        String[] strings = new String[lists.size()+2];
+        strings[i++] = String.valueOf(lists.size());
+        strings[i++] = "\r\n";
+        for (int j=0; j < lists.size(); ++i,++j){
+            sb = new StringBuilder();
+            list = lists.get(j);
+            for (Integer id:list){
+                sb.append(id+" ");
+            }
+            strings[i] = sb.toString().trim()+"\r\n";
+        }
+        return strings;
+    }
+
 
 }

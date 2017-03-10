@@ -54,21 +54,21 @@ public class App {
         graph.serverIds.add(26);
 
 
+        System.out.println(graph.serverIds.size()+"---");
         PQDijkstra pqDijkstra = new PQDijkstra(graph, 1000);
 
         int sum = pqDijkstra.searchGraphPaths(graph.userAdjVertices, newTable);
 
 
-//        for (List<Integer> list:pqDijkstra.getAllPathList()){
-//            for (Integer integer:list){
-//                System.out.print(integer+" ");
-//            }
-//            System.out.println();
-//        }
-//        System.out.println(sum);
-        for (Edge edge:graph.getEdges()){
-            System.out.println(edge);
+        for (List<Integer> list:pqDijkstra.getAllPathList()){
+            for (Integer integer:list){
+                System.out.print(integer+" ");
+            }
+            System.out.println();
         }
+        System.out.println(sum);
+        System.out.println(graph.serverIds.size());
+
 
 
     }

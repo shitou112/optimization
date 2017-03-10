@@ -18,6 +18,6 @@ public class NetworkVertex extends Vertex{
 
     @Override
     public String toString() {
-        return "id:"+id+"---neighbor:"+neighborId+"---userdatas"+userDatas;
+        return "id:"+id+"---neighbor:"+neighborId+"---userdatas"+userDatas+"---data"+data;
     }
 }

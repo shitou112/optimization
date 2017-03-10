@@ -31,7 +31,7 @@ public class GraphProcess {
 
         //创建节点邻接表
 //        createVerticesTable();
-//        dataSort();
+        dataSort();
         return graph;
     }
 
