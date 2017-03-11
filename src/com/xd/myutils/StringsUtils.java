@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -35,7 +36,7 @@ public class StringsUtils {
         Graph graph = new Graph();
         List<UserVertex> userVextexList = new ArrayList<>();
         List<NetworkVertex> networkVertexList = new ArrayList<>();
-        List<NetworkVertex> userAdjVertices = new ArrayList<>();
+        List<NetworkVertex> userAdjVertices = new LinkedList<>();
         List<Edge> edgeList = new ArrayList<>();
 
 

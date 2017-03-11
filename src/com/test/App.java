@@ -2,6 +2,7 @@ package com.test;
 
 import com.filetool.util.FileUtil;
 import com.xd.algorithm.PQDijkstra;
+import com.xd.algorithm.PQDijkstraImprove;
 import com.xd.graph.Edge;
 import org.junit.Test;
 import com.xd.data.ServerPoint;
@@ -19,7 +20,7 @@ import java.util.List;
  * @created on 2017/3/4.
  */
 public class App {
-    String FILEPATH = "E:\\case_example\\mycase.txt";
+    String FILEPATH = "E:\\case_example\\mycase0.txt";
     Graph graph = StringsUtils.readStrings(FileUtil.read(FILEPATH,null));
 
     @Test
@@ -28,35 +29,19 @@ public class App {
         graphProcess.addEdgesOfVertex();
         graphProcess.updateGraph();
 
-        HashMap<Integer, Graph.Node>[] newTable = new HashMap[graph.networkVertexnum];
-        HashMap<Integer, Graph.Node> hashMap;
-        List<Edge> newEdges = new ArrayList<>();
-        for (int i=0; i < graph.networkVertexnum; ++i){
-            if (graph.table[i] != null) {
-                hashMap = new HashMap<>();
-                for (Integer id : graph.table[i].keySet()) {
-                    hashMap.put(id, graph.new Node((Edge)graph.table[i].get(id).element.clone()));
-                }
-                newTable[i] = hashMap;
-            }
-            else {
-                newTable[i] = null;
-            }
 
-
-        }
 
         graph.serverIds = new ArrayList<>();
-        graph.serverIds.add(0);
-        graph.serverIds.add(1);
         graph.serverIds.add(3);
 
 
 
-        System.out.println(graph.serverIds.size()+"---");
-        PQDijkstra pqDijkstra = new PQDijkstra(graph, 1000);
 
-        int sum = pqDijkstra.searchGraphPaths(graph.userAdjVertices, newTable);
+
+        System.out.println(graph.serverIds.size()+"---");
+        PQDijkstraImprove pqDijkstra = new PQDijkstraImprove(graph, 1000);
+
+        int sum = pqDijkstra.searchGraphPaths(graph.userAdjVertices, graph.table);
 
 
         for (List<Integer> list:pqDijkstra.getAllPathList()){
@@ -68,7 +53,25 @@ public class App {
         System.out.println(sum);
         System.out.println(graph.serverIds.size());
 
-
+//        for (int i=0; i < graph.table.length; ++i){
+//            if (graph.table[i]!=null) {
+//                for(Integer id: graph.table[i].keySet()){
+//                    System.out.print(i+"---"+id+"---"+graph.table[i].get(id)+":::");
+//                }
+//            }
+//            System.out.println();
+//        }
+//
+//        System.out.println("======================");
+//        graphProcess.addEdgesOfVertex();
+//        for (int i=0; i < graph.table.length; ++i){
+//            if (graph.table[i]!=null) {
+//                for(Integer id: graph.table[i].keySet()){
+//                    System.out.print(i+"---"+id+"---"+graph.table[i].get(id)+":::");
+//                }
+//            }
+//            System.out.println();
+//        }
 
     }
 

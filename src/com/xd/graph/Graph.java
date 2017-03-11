@@ -1,9 +1,6 @@
 package com.xd.graph;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Qian Shaofeng
@@ -106,6 +103,9 @@ public class Graph implements Cloneable{
 
     }
 
+    public void shuffleUseradjVertice(List list){
+        Collections.shuffle(list);
+    }
 
     public class Node implements Cloneable{
 
