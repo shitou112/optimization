@@ -24,14 +24,14 @@ public class GraphProcess {
         dataStatistic();
 
         //添加相邻边
-        addEdgesOfVertex();
+//        addEdgesOfVertex();
 
         //删除无效节点
 //        deleteUselessVertex();
 
         //创建节点邻接表
 //        createVerticesTable();
-        dataSort();
+//        dataSort();
         return graph;
     }
 
@@ -74,9 +74,11 @@ public class GraphProcess {
      */
     public void addEdgesOfVertex(){
         graph.table = new HashMap[graph.networkVertexnum];
+        Edge copyEdge;
         for (Edge edge: graph.getEdges()){
-            graph.add(edge.v, edge.w, edge.money, edge);
-            graph.add(edge.w, edge.v, edge.money, edge);
+            copyEdge = edge.clone();
+            graph.add(copyEdge.v, copyEdge.w, copyEdge);
+            graph.add(copyEdge.w, copyEdge.v, copyEdge);
         }
     }
 
@@ -106,4 +108,8 @@ public class GraphProcess {
 //            }
 //        }
 //    }
+
+    public Graph getGraph(){
+        return graph;
+    }
 }

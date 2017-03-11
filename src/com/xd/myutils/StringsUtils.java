@@ -28,6 +28,7 @@ public class StringsUtils {
      * @return 网络拓扑图
      */
     public static Graph readStrings(String[] graphContent){
+
         String str;
         int lineNum = 0;
 
@@ -58,6 +59,7 @@ public class StringsUtils {
         //读取相关的链路边
         Edge edge;
         for (int i = 0; i < graph.edgenum; ++i){
+
             str = graphContent[lineNum++];
             strs = str.split(" ");
             edge = new Edge(Integer.valueOf(strs[0]), Integer.valueOf(strs[1]),

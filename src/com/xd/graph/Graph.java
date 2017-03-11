@@ -1,5 +1,6 @@
 package com.xd.graph;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,7 +40,7 @@ public class Graph implements Cloneable{
     /**
      * 部署服务器的节点id
      */
-    public List<Integer> serverIds;
+    public List<Integer> serverIds = new ArrayList<>();
 
     /**
      * 与用户节点相邻的网络节点
@@ -96,10 +97,9 @@ public class Graph implements Cloneable{
      *
      * @param firstId 当前节点id号
      * @param nextVertexId 下个节点的id号
-     * @param minCost 当前节点到下节点边的最小花费
      * @param edge 添加的链路边
      */
-    public void add(int firstId, int nextVertexId, int minCost, Edge edge){
+    public void add(int firstId, int nextVertexId, Edge edge){
         if (table[firstId] == null)
             table[firstId] = new HashMap<>();
         table[firstId].put(nextVertexId,new Node(edge));

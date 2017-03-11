@@ -19,12 +19,13 @@ import java.util.List;
  * @created on 2017/3/4.
  */
 public class App {
-    String FILEPATH = "E:\\case_example\\case0.txt";
+    String FILEPATH = "E:\\case_example\\mycase.txt";
     Graph graph = StringsUtils.readStrings(FileUtil.read(FILEPATH,null));
 
     @Test
     public void graphCloneTest() throws CloneNotSupportedException {
         GraphProcess graphProcess = new GraphProcess(graph);
+        graphProcess.addEdgesOfVertex();
         graphProcess.updateGraph();
 
         HashMap<Integer, Graph.Node>[] newTable = new HashMap[graph.networkVertexnum];
@@ -46,12 +47,10 @@ public class App {
         }
 
         graph.serverIds = new ArrayList<>();
-        graph.serverIds.add(35);
-        graph.serverIds.add(16);
-        graph.serverIds.add(17);
-        graph.serverIds.add(9);
+        graph.serverIds.add(0);
+        graph.serverIds.add(1);
         graph.serverIds.add(3);
-        graph.serverIds.add(26);
+
 
 
         System.out.println(graph.serverIds.size()+"---");

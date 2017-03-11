@@ -18,7 +18,7 @@ public class Edge implements Cloneable{
     }
 
     @Override
-    public Object clone() throws CloneNotSupportedException {
+    public Edge clone(){
         Edge edge = new Edge(v, w, weight, money);
         return edge;
     }
