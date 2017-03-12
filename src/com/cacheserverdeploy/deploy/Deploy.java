@@ -27,12 +27,12 @@ public class Deploy
         graphProcess.updateGraph();
 
         GA ga = null;
-        for (int i=0; i < 5; ++i) {
-            ga = new GA(40, 0.9, 0.6, 0.1, 0.2, 0.6, graph.networkVertexnum, 1000, graphProcess);
+//        for (int i=0; i < 5; ++i) {
+            ga = new GA(30, 0.9, 0.6, 0.1, 0.2, 0.6, graph.networkVertexnum, 1000, graphProcess);
             ga.startGA();
             list = ga.getBestList();
             System.out.println(ga.getBestCost()+" "+ga.getBestId());
-        }
+//        }
         return StringsUtils.ListT0Strings(list);
     }
 

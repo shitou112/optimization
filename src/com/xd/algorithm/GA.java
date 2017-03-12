@@ -297,8 +297,6 @@ public class GA {
         // 适应度
         int fitness;
 
-        //服务器个数
-        int servernums;
 
         // 双亲，交叉节点
         int parent1, parent2, cross;
