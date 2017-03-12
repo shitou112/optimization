@@ -43,7 +43,7 @@ public class App {
 
         int sum = pqDijkstra.searchGraphPaths(graph.userAdjVertices, graph.table);
 
-
+        System.out.println();
         for (List<Integer> list:pqDijkstra.getAllPathList()){
             for (Integer integer:list){
                 System.out.print(integer+" ");
