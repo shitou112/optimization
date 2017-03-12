@@ -114,12 +114,22 @@ public class StringsUtils {
         strings[i++] = String.valueOf(lists.size());
         strings[i++] = "\r\n";
         for (int j=0; j < lists.size(); ++i,++j){
-            sb = new StringBuilder();
-            list = lists.get(j);
-            for (Integer id:list){
-                sb.append(id+" ");
+            if (j == (lists.size()-1)){
+                sb = new StringBuilder();
+                list = lists.get(j);
+                for (Integer id : list) {
+                    sb.append(id + " ");
+                }
+                strings[i] = sb.toString().trim();
             }
-            strings[i] = sb.toString().trim()+"\r\n";
+            else {
+                sb = new StringBuilder();
+                list = lists.get(j);
+                for (Integer id : list) {
+                    sb.append(id + " ");
+                }
+                strings[i] = sb.toString().trim() + "\r\n";
+            }
         }
         return strings;
     }

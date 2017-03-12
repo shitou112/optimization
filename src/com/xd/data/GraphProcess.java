@@ -22,6 +22,7 @@ public class GraphProcess {
 
         //流量统计
         dataStatistic();
+        dataSort();
         dataSortUserAdjVertices();
 
         //添加相邻边

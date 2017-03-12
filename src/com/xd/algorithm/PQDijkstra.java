@@ -51,7 +51,9 @@ public class PQDijkstra {
      * @return 总共花费
      */
     public int searchGraphPaths(List<NetworkVertex> userVertices, HashMap<Integer, Graph.Node>[] hashMaps){
-
+        if (graph.serverIds.size() ==0 ){
+            graph.serverIds.add(graph.userAdjVertices.get(0).id);
+        }
         for (NetworkVertex userVertex : userVertices){
 
             //一个节点寻找服务器的花费
@@ -81,13 +83,14 @@ public class PQDijkstra {
 
         pathsList.clear();
 
+
         onePathWeight = searchOnePath(s, userId, tempData, hashMaps);
         oneVertexCost += oneCost;
+
+        //判断选择的服务器节点能否满足用户需求
         while (tempData > onePathWeight){
             tempData -= onePathWeight;
             onePathWeight = searchOnePath(s, userId, tempData, hashMaps);
-            if (oneVertexCost > graph.serverValue)
-                onePathWeight = 101;
         }
         if (onePathWeight == 101) {
             pathsList.clear();

@@ -1,6 +1,7 @@
 package com.test;
 
 import com.filetool.util.FileUtil;
+import com.xd.algorithm.GA;
 import com.xd.algorithm.PQDijkstra;
 import com.xd.algorithm.PQDijkstraImprove;
 import com.xd.graph.Edge;
@@ -22,6 +23,51 @@ import java.util.List;
 public class App {
     String FILEPATH = "E:\\case_example\\mycase0.txt";
     Graph graph = StringsUtils.readStrings(FileUtil.read(FILEPATH,null));
+
+    public void gaTest(){
+        int bestcost = Integer.MAX_VALUE;
+        double best_pro_corss =0,best_pro_mutution=0, best_pro_better=0,
+                best_xnor=0, best_init_server=0;
+
+        GraphProcess graphProcess = new GraphProcess(graph);
+        double[] pro_cross = {0.9};
+        double[] pro_mutution = {0.6};
+        double[] pro_better_mutution = {0.1};
+        double[] pro_xnor = {0.6, 0.5};
+        double[] pro_init_server = {0.2};
+        GA ga = null;
+        for (int i=0; i < pro_cross.length; ++i){
+            for (int j=0; j < pro_mutution.length; ++j){
+                for (int m=0; m < pro_better_mutution.length;++m){
+                    for (int n=0; n < pro_init_server.length; ++n){
+                        for (int k=0; k < pro_xnor.length; ++k){
+                            ga =new GA(50, pro_cross[i], pro_mutution[j], pro_better_mutution[m], pro_init_server[n], pro_xnor[k],graph.networkVertexnum, 800, graphProcess);
+                            ga.startGA();
+                            if (ga.getBestCost() < bestcost){
+                                best_pro_mutution = pro_mutution[j];
+                                best_pro_corss = pro_cross[i];
+                                best_pro_better = pro_better_mutution[m];
+                                best_init_server = pro_init_server[n];
+                                best_xnor = pro_xnor[k];
+
+                            }
+                        }
+
+                    }
+                }
+
+            }
+        }
+
+        System.out.println(best_pro_corss);
+        System.out.println(best_pro_mutution);
+        System.out.println(best_pro_better);
+        System.out.println(best_init_server);
+        System.out.println(best_xnor);
+        System.out.println("=====");
+        System.out.println(ga.getBestCost());
+        System.out.println(ga.getBestId());
+    }
 
     @Test
     public void graphCloneTest() throws CloneNotSupportedException {

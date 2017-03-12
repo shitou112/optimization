@@ -8,6 +8,8 @@ public class NetworkVertex extends Vertex{
 
     public Integer userDatas;
 
+    public int score;
+
     public NetworkVertex(int id, int data){
         this.id = id;
         this.data = data;

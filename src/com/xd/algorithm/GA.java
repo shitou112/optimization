@@ -33,7 +33,7 @@ public class GA {
 
     private int sumFitness, minFitness, maxFitness, avgFitness;
 
-    private double alpha;
+    private double pro_init_server;
 
     private int minPop, maxPop;
 
@@ -55,19 +55,21 @@ public class GA {
 
 
 
-    public GA(int pop_size, double pro_cross, double pro_mutate, double pro_better_mutate, double pro_xnor, int chrom_size,
+    public GA(int pop_size, double pro_cross, double pro_mutate, double pro_better_mutate,double pro_init_server, double pro_xnor, int chrom_size,
               int generation_num, GraphProcess graphProcess){
         this.pop_size = pop_size;
         this.pro_cross = pro_cross;
         this.pro_mutate = pro_mutate;
         this.pro_better_mutate = pro_better_mutate;
         this.pro_xnor = pro_xnor;
+        this.pro_init_server = pro_init_server;
         this.chrom_size = chrom_size;
         this.generation_num = generation_num;
         this.oldPop = new Population[pop_size];
         this.newPop = new Population[pop_size];
         this.random = new Random();
         this.graphProcess = graphProcess;
+        this.graph = graphProcess.getGraph();
         this.serverNum = graphProcess.getGraph().getUserVertexs().size();
     }
 
@@ -84,7 +86,6 @@ public class GA {
 
     public int calFit(int[] chr){
         graphProcess.addEdgesOfVertex();
-        graph = graphProcess.getGraph();
         graph.serverIds.clear();
         for (int i=0; i < chr.length; ++i){
             if (chr[i] == 1)
@@ -118,11 +119,11 @@ public class GA {
                 minPop = i;
             }
         }
-//        for (i=0; i < pop_size && pop[i].fitness != Integer.MAX_VALUE; ++i){
-//            sumFitness += (maxFitness - pop[i].fitness);
-//
-//        }
-//        avgFitness = sumFitness / pop_size;
+        for (i=0; i < pop_size; ++i){
+            sumFitness += (maxFitness - pop[i].fitness);
+
+        }
+        avgFitness = sumFitness / pop_size;
     }
 
 
@@ -139,24 +140,26 @@ public class GA {
 
 
             for (j=0; j < serverNum; j++){
-                k = random.nextInt(chrom_size);
-                oldPop[i].chrom[k] = 1;
+                if (excise() <= pro_init_server) {
+                    k = random.nextInt(serverNum);
+
+                    oldPop[i].chrom[graph.getNetworkVertices().get(k).id] = 1;
+                }
             }
+            oldPop[i].fitness = calFit(oldPop[i].chrom);
             oldPop[i].parent1 = 0;
             oldPop[i].parent2 = 0;
             oldPop[i].cross = 0;
         }
     }
 
-    boolean excise(double probability){
+    double excise(){
         double pp;
         pp = random.nextDouble();
-        if (pp < probability)
-            return true;
-        return false;
+        return pp;
     }
 
-    int selection(int pop){
+    int selection(){
         double wheelPos, randNumber, partsum = 0;
         int i = 0;
 
@@ -166,14 +169,14 @@ public class GA {
         do {
             partsum += (maxFitness - oldPop[i].fitness);
             i++;
-        }while((partsum < wheelPos) && i < pop_size && oldPop[i].fitness!=Integer.MAX_VALUE);
+        }while((partsum < wheelPos) && i < pop_size);
         return i-1;
     }
 
     boolean crossOver(int[] parent1, int[] parent2, int i){
         int j;
         int crossPos;
-        if (excise(pro_cross)){
+        if (excise() <= pro_cross){
             crossPos = random.nextInt(chrom_size);
         }
         else {
@@ -193,21 +196,25 @@ public class GA {
     }
 
     int mutation(int alleles){
-        if (excise(pro_mutate)){
+        double pp = excise();
+        if (pp <= pro_mutate){
             if (alleles==1)
                 alleles = 0;
-        }
-        if (excise(pro_better_mutate)){
-            if (alleles == 0)
-                alleles =1;
+            else {
+                if (pp <= pro_better_mutate){
+                    if (alleles == 0)
+                        alleles =1;
+                }
+            }
         }
         return alleles;
+
     }
 
     void xnor(int[] parent1, int[] parent2, int i){
         int j;
         int xnor = 0;
-        if (excise(pro_xnor)){
+        if (excise() <= pro_xnor){
             xnor = random.nextInt(chrom_size);
         }
         for (j=0; j < xnor; ++j){
@@ -220,16 +227,21 @@ public class GA {
 
     void generation(int genId){
         int i,j,mate1,mate2;
-        int tmpFit, tmpServerNum;
-        boolean notGen;
+
         for (i=0; i < pop_size; i++){
-            notGen = false;
-            while (!notGen){
-                mate1 = selection(i);
-                mate2 = selection(i+1);
+
+            if (i == minPop){
+                newPop[i].chrom = oldPop[i].chrom;
+                newPop[i].fitness = oldPop[i].fitness;
+                newPop[i].parent1 = oldPop[i].parent1;
+                newPop[i].parent2 = oldPop[i].parent2;
+            }
+            else {
+                mate1 = selection();
+                mate2 = selection();
                 crossOver(oldPop[mate1].chrom, oldPop[mate2].chrom, i);
                 xnor(oldPop[mate1].chrom, oldPop[mate2].chrom, i);
-                for (j = 0; j < chrom_size; ++j){
+                for (j = 0; j < chrom_size; ++j) {
                     newPop[i].chrom[j] = mutation(newPop[i].chrom[j]);
                 }
 
@@ -237,16 +249,15 @@ public class GA {
                 newPop[i].parent1 = mate1;
                 newPop[i].parent2 = mate2;
 
-                notGen = true;
 
                 if (newPop[i].fitness < bestCost) {
                     bestCost = newPop[i].fitness;
                     bestList = pathList;
                     bestId = genId;
-
                 }
-
             }
+
+
         }
     }
 
@@ -254,9 +265,10 @@ public class GA {
         int gen = 0, oldMaxPop, oldMax;
         random = new Random(System.currentTimeMillis());
         initPop();
-        statistics(newPop);
+        statistics(oldPop);
         while (gen < generation_num){
             ++gen;
+            graph.shuffleUseradjVertice(graph.userAdjVertices);
             if (gen % 100 == 0)
                 random = new Random(System.currentTimeMillis());
             oldMaxPop = maxPop;
