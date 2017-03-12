@@ -85,7 +85,7 @@ public class PQDijkstra {
 
 
         onePathWeight = searchOnePath(s, userId, tempData, hashMaps);
-        oneVertexCost += oneCost;
+
 
         //判断选择的服务器节点能否满足用户需求
         while (tempData > onePathWeight){
@@ -198,6 +198,7 @@ public class PQDijkstra {
         list.add(minWeight);
         pathsList.add(list);
 
+        oneVertexCost += oneCost;
 
         return minWeight;
     }

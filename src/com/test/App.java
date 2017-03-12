@@ -3,8 +3,6 @@ package com.test;
 import com.filetool.util.FileUtil;
 import com.xd.algorithm.GA;
 import com.xd.algorithm.PQDijkstra;
-import com.xd.algorithm.PQDijkstraImprove;
-import com.xd.graph.Edge;
 import org.junit.Test;
 import com.xd.data.ServerPoint;
 import com.xd.data.GraphProcess;
@@ -13,7 +11,6 @@ import com.xd.graph.NetworkVertex;
 import com.xd.myutils.StringsUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -21,19 +18,21 @@ import java.util.List;
  * @created on 2017/3/4.
  */
 public class App {
-    String FILEPATH = "E:\\case_example\\mycase0.txt";
+    String FILEPATH = "E:\\case_example\\mycase.txt";
     Graph graph = StringsUtils.readStrings(FileUtil.read(FILEPATH,null));
 
+    @Test
     public void gaTest(){
         int bestcost = Integer.MAX_VALUE;
         double best_pro_corss =0,best_pro_mutution=0, best_pro_better=0,
                 best_xnor=0, best_init_server=0;
 
         GraphProcess graphProcess = new GraphProcess(graph);
+        graphProcess.updateGraph();
         double[] pro_cross = {0.9};
-        double[] pro_mutution = {0.6};
+        double[] pro_mutution = {0.6,0.4};
         double[] pro_better_mutution = {0.1};
-        double[] pro_xnor = {0.6, 0.5};
+        double[] pro_xnor = {0.5,0.6,0.7};
         double[] pro_init_server = {0.2};
         GA ga = null;
         for (int i=0; i < pro_cross.length; ++i){
@@ -44,6 +43,7 @@ public class App {
                             ga =new GA(50, pro_cross[i], pro_mutution[j], pro_better_mutution[m], pro_init_server[n], pro_xnor[k],graph.networkVertexnum, 800, graphProcess);
                             ga.startGA();
                             if (ga.getBestCost() < bestcost){
+                                bestcost = ga.getBestCost();
                                 best_pro_mutution = pro_mutution[j];
                                 best_pro_corss = pro_cross[i];
                                 best_pro_better = pro_better_mutution[m];
@@ -72,98 +72,68 @@ public class App {
     @Test
     public void graphCloneTest() throws CloneNotSupportedException {
         GraphProcess graphProcess = new GraphProcess(graph);
-        graphProcess.addEdgesOfVertex();
         graphProcess.updateGraph();
 
 
 
-        graph.serverIds = new ArrayList<>();
-        graph.serverIds.add(3);
 
 
-
-
-
-        System.out.println(graph.serverIds.size()+"---");
-        PQDijkstraImprove pqDijkstra = new PQDijkstraImprove(graph, 1000);
-
-        int sum = pqDijkstra.searchGraphPaths(graph.userAdjVertices, graph.table);
-
-        System.out.println();
-        for (List<Integer> list:pqDijkstra.getAllPathList()){
-            for (Integer integer:list){
-                System.out.print(integer+" ");
+        for (int i=0; i < graph.table.length; ++i){
+            if (graph.table[i]!=null) {
+                for(Integer id: graph.table[i].keySet()){
+                    System.out.print(i+"---"+id+"---"+graph.table[i].get(id)+":::");
+                }
             }
             System.out.println();
         }
-        System.out.println(sum);
-        System.out.println(graph.serverIds.size());
 
-//        for (int i=0; i < graph.table.length; ++i){
-//            if (graph.table[i]!=null) {
-//                for(Integer id: graph.table[i].keySet()){
-//                    System.out.print(i+"---"+id+"---"+graph.table[i].get(id)+":::");
-//                }
-//            }
-//            System.out.println();
-//        }
-//
-//        System.out.println("======================");
-//        graphProcess.addEdgesOfVertex();
-//        for (int i=0; i < graph.table.length; ++i){
-//            if (graph.table[i]!=null) {
-//                for(Integer id: graph.table[i].keySet()){
-//                    System.out.print(i+"---"+id+"---"+graph.table[i].get(id)+":::");
-//                }
-//            }
-//            System.out.println();
-//        }
+        System.out.println("======================");
+        graphProcess.addEdgesOfVertex();
+        for (int i=0; i < graph.table.length; ++i){
+            if (graph.table[i]!=null) {
+                for(Integer id: graph.table[i].keySet()){
+                    System.out.print(i+"---"+id+"---"+graph.table[i].get(id)+":::");
+                }
+            }
+            System.out.println();
+        }
 
     }
 
     /**
      * 注意此测试中的寻找路径为空需要后续处理，例如添加服务器节点
      */
-//    @Test
-//    public void searchPathTest(){
-//        long start = System.currentTimeMillis();
-//
-//        graph.serverIds = new ArrayList<>();
-//        graph.serverIds.add(35);
-//        graph.serverIds.add(16);
-//        graph.serverIds.add(17);
-//        graph.serverIds.add(9);
-//        graph.serverIds.add(3);
-//        graph.serverIds.add(26);
-//
-//        GraphProcess graphProcess = new GraphProcess(graph);
-//        graphProcess.updateGraph();
-//        PQDijkstra pqDijkstra = new PQDijkstra(graph, 1000);
-//
-//        for (NetworkVertex networkVertex:graph.userAdjVertices){
-//            List<List> lists = pqDijkstra.searchPath(networkVertex.id, networkVertex.neighborId,networkVertex.userDatas, );
-//            if (lists==null){
-//                graph.serverIds.add(networkVertex.id);
-////                System.out.println(networkVertex.id+"---"+networkVertex.neighborId+"---"+networkVertex.userDatas);
-//            }
-//            else {
-//                for (List<Integer> list1 : lists) {
-//                    for (Integer integer : list1) {
-//                        System.out.print(integer + " ");
-//                    }
-//                    System.out.println();
-//                }
-//            }
-//        }
-//
-//        long end = System.currentTimeMillis();
-//
-//        System.out.println(end - start);
-//
-//
-//
-//
-//    }
+    @Test
+    public void searchPathTest(){
+        long start = System.currentTimeMillis();
+
+       GraphProcess graphProcess = new GraphProcess(graph);
+        graphProcess.updateGraph();
+
+        graph.serverIds.add(0);
+        graph.serverIds.add(1);
+        graph.serverIds.add(24);
+        PQDijkstra pqDijkstra = new PQDijkstra(graph, 1000);
+
+        int cost = pqDijkstra.searchGraphPaths(graph.userAdjVertices, graph.table);
+        for (List<Integer> list: pqDijkstra.getAllPathList()){
+            for (Integer id: list){
+                System.out.print(id+" ");
+            }
+            System.out.println();
+        }
+        for (Integer id: graph.serverIds){
+            System.out.print(id+" ");
+        }
+        System.out.println();
+        long end = System.currentTimeMillis();
+
+        System.out.println(cost);
+
+
+
+
+    }
 
     @Test
     public void deleteUselessVertexTest(){

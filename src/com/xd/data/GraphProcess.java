@@ -13,6 +13,8 @@ import java.util.*;
 public class GraphProcess {
     private Graph graph;
     private List datalist;
+    private int sumData;
+
 
     public GraphProcess(Graph graph){
         this.graph = graph;
@@ -21,9 +23,11 @@ public class GraphProcess {
     public Graph updateGraph(){
 
         //流量统计
+        addEdgesOfVertex();
         dataStatistic();
         dataSort();
         dataSortUserAdjVertices();
+
 
         //添加相邻边
 //        addEdgesOfVertex();
@@ -31,28 +35,30 @@ public class GraphProcess {
         //删除无效节点
 //        deleteUselessVertex();
 
-        //创建节点邻接表
-//        createVerticesTable();
-//        dataSort();
+
         return graph;
     }
 
     /**
-     * 创建节点的邻接表
+     * 计算与用户节点相邻的网络节点得分，其作用是用于确定找路径的顺序
      */
-//    public void createVerticesTable(){
-//        graph.adj = new Graph.VertexInfo[graph.networkVertexnum][graph.networkVertexnum];
-//        for (Edge edge: graph.getEdges()){
-//
-//            Graph.VertexInfo vertexInfo = graph.new VertexInfo(edge.w, edge);
-//            graph.adj[edge.v][edge.w] = vertexInfo;
-//            graph.adj[edge.v][edge.w].edge = edge;
-//
-//            vertexInfo = graph.new VertexInfo(edge.v, edge);
-//            graph.adj[edge.w][edge.v] = vertexInfo;
-//
-//        }
-//    }
+    private void computeUserScore(){
+        NetworkVertex networkVertex = null;
+        for (int i=0; i < graph.userAdjVertices.size(); ++i){
+            networkVertex = graph.userAdjVertices.get(i);
+            networkVertex.userScore = 100*1.0/graph.table[i].size()*0.7 +  networkVertex.userDatas*1.0/graph.userNeedData*30;
+        }
+    }
+
+    /**
+     *计算各个节点的服务器得分
+     */
+    private void computeServerScore(){
+        double A = 0.7, B = 0.3;
+        for (NetworkVertex networkVertex: graph.getNetworkVertices()){
+            networkVertex.serverScore = A*(networkVertex.data*1.0/sumData) + B*(networkVertex.userDatas*1.0/graph.userNeedData);
+        }
+    }
 
     /**
      * 处理网络拓扑图中的流量，统计每个节点的流量数据
@@ -67,6 +73,7 @@ public class GraphProcess {
             edge = edgelist.get(i);
             networkVertexList.get(edge.v).data += edge.weight;
             networkVertexList.get(edge.w).data += edge.weight;
+            sumData +=edge.weight*2;
         }
 
     }
@@ -85,15 +92,26 @@ public class GraphProcess {
     }
 
     public void dataSortUserAdjVertices(){
-        Collections.sort(graph.userAdjVertices);
+        computeUserScore();
+        Collections.sort(graph.userAdjVertices, new Comparator<NetworkVertex>() {
+            @Override
+            public int compare(NetworkVertex o1, NetworkVertex o2) {
+                if (o1.userScore < o2.userScore)
+                    return 1;
+                else if (o1.userScore == o2.userScore)
+                    return 0;
+                else
+                    return -1;
+            }
+        });
     }
 
     /**
      * 对网络拓扑图中各个节点的流量进行排序
      *
-     * @return
      */
     private void dataSort(){
+        computeServerScore();
         Collections.sort(graph.getNetworkVertices());
     }
 

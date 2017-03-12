@@ -79,6 +79,7 @@ public class StringsUtils {
             networkVertexList.add(networkVertex);
         }
         graph.setNetworkVertices(networkVertexList);
+
         //读取消费节点
         UserVertex userVertex;
         int userId = 0,neighborId = 0,userDatas = 0;
@@ -89,6 +90,7 @@ public class StringsUtils {
             userId = Integer.valueOf(strs[0]);
             neighborId = Integer.valueOf(strs[1]);
             userDatas = Integer.valueOf(strs[2]);
+            graph.userNeedData += userDatas;
             userVertex = new UserVertex(userId, neighborId, userDatas);
 
             networkVertexList.get(neighborId).userDatas = userDatas;

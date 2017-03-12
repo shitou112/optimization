@@ -28,6 +28,12 @@ public class Graph implements Cloneable{
     public int serverValue;
 
     /**
+     * 用户总需求流量
+     */
+    public int userNeedData;
+
+
+    /**
      * table是节点数组，每一个元素中存储着与该节点相邻边的信息，
      * 其每个数组元素中存放的是一个边的链表
      */
