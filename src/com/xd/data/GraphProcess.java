@@ -22,6 +22,7 @@ public class GraphProcess {
 
         //流量统计
         dataStatistic();
+        dataSortUserAdjVertices();
 
         //添加相邻边
 //        addEdgesOfVertex();
@@ -80,6 +81,10 @@ public class GraphProcess {
             graph.add(copyEdge.v, copyEdge.w, copyEdge);
             graph.add(copyEdge.w, copyEdge.v, copyEdge);
         }
+    }
+
+    public void dataSortUserAdjVertices(){
+        Collections.sort(graph.userAdjVertices);
     }
 
     /**

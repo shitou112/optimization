@@ -26,11 +26,13 @@ public class Deploy
         Graph graph = StringsUtils.readStrings(graphContent);
         GraphProcess graphProcess = new GraphProcess(graph);
         double[] pro_cross = {0.618};
-        double[] pro_mutution = {0.3};
+        double[] pro_mutution = {0.1};
+        double[] pro_better_mutution = {0.01};
+        double pro_xnor = 0.1;
         GA ga = null;
         for (int i=0; i < pro_cross.length; ++i){
             for (int j=0; j < pro_mutution.length; ++j){
-                ga =new GA(20, pro_cross[i], pro_mutution[j], graph.networkVertexnum, 1000, graphProcess);
+                ga =new GA(20, pro_cross[i], pro_mutution[j], pro_better_mutution[0], pro_xnor,graph.networkVertexnum, 1000, graphProcess);
                 ga.startGA();
                 if (ga.getBestCost() < bestcost){
                     best_pro_mutution = pro_mutution[j];
@@ -44,6 +46,8 @@ public class Deploy
         System.out.println(best_pro_mutution);
         System.out.println("=====");
         System.out.println(ga.getBestCost());
+        System.out.println(ga.getBestId());
+
 
 
         return StringsUtils.ListT0Strings(list);

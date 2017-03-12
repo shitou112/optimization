@@ -20,6 +20,11 @@ public class GA {
     // 变异概率
     private double pro_mutate;
 
+    private double pro_better_mutate;
+
+    //同或概率
+    private double pro_xnor;
+
     // 染色体长度
     private int chrom_size;
 
@@ -50,11 +55,13 @@ public class GA {
 
 
 
-    public GA(int pop_size, double pro_cross, double pro_mutate, int chrom_size,
+    public GA(int pop_size, double pro_cross, double pro_mutate, double pro_better_mutate, double pro_xnor, int chrom_size,
               int generation_num, GraphProcess graphProcess){
         this.pop_size = pop_size;
         this.pro_cross = pro_cross;
         this.pro_mutate = pro_mutate;
+        this.pro_better_mutate = pro_better_mutate;
+        this.pro_xnor = pro_xnor;
         this.chrom_size = chrom_size;
         this.generation_num = generation_num;
         this.oldPop = new Population[pop_size];
@@ -85,7 +92,7 @@ public class GA {
         }
 
         //使用dijkstra算法求得最小路径
-        PQDijkstraImprove pqDijkstra = new PQDijkstraImprove(graph, 1000);
+        PQDijkstra pqDijkstra = new PQDijkstra(graph, 1000);
 
         int sum = pqDijkstra.searchGraphPaths(graph.userAdjVertices, graph.table);
         pathList = pqDijkstra.getAllPathList();
@@ -150,18 +157,17 @@ public class GA {
     }
 
     int selection(int pop){
-//        double wheelPos, randNumber, partsum = 0;
-//        int i = 0;
-//
-//        randNumber = random.nextDouble();
-//
-//        wheelPos = randNumber*sumFitness;
-//        do {
-//            partsum += (maxFitness - oldPop[i].fitness);
-//            i++;
-//        }while((partsum < wheelPos) && i < pop_size && oldPop[i].fitness!=Integer.MAX_VALUE);
-//        return i-1;
-        return minPop;
+        double wheelPos, randNumber, partsum = 0;
+        int i = 0;
+
+        randNumber = random.nextDouble();
+
+        wheelPos = randNumber*sumFitness;
+        do {
+            partsum += (maxFitness - oldPop[i].fitness);
+            i++;
+        }while((partsum < wheelPos) && i < pop_size && oldPop[i].fitness!=Integer.MAX_VALUE);
+        return i-1;
     }
 
     boolean crossOver(int[] parent1, int[] parent2, int i){
@@ -188,9 +194,28 @@ public class GA {
 
     int mutation(int alleles){
         if (excise(pro_mutate)){
-            alleles = alleles == 0?1:0;
+            if (alleles==1)
+                alleles = 0;
+        }
+        if (excise(pro_better_mutate)){
+            if (alleles == 0)
+                alleles =1;
         }
         return alleles;
+    }
+
+    void xnor(int[] parent1, int[] parent2, int i){
+        int j;
+        int xnor = 0;
+        if (excise(pro_xnor)){
+            xnor = random.nextInt(chrom_size);
+        }
+        for (j=0; j < xnor; ++j){
+            newPop[i].chrom[j] = parent1[j];
+        }
+        for (; j < chrom_size; ++j){
+            newPop[i].chrom[j] = parent1[j]==parent2[j]? parent1[j]:0;
+        }
     }
 
     void generation(int genId){
@@ -203,34 +228,23 @@ public class GA {
                 mate1 = selection(i);
                 mate2 = selection(i+1);
                 crossOver(oldPop[mate1].chrom, oldPop[mate2].chrom, i);
+                xnor(oldPop[mate1].chrom, oldPop[mate2].chrom, i);
                 for (j = 0; j < chrom_size; ++j){
                     newPop[i].chrom[j] = mutation(newPop[i].chrom[j]);
                 }
 
-                tmpServerNum = calServerNum(newPop[i].chrom);
-                if (tmpServerNum <= serverNum) {
-                    int changeNum = 3;
-                    while ((tmpFit = calFit(newPop[i].chrom)) == Integer.MAX_VALUE && changeNum>=0){
-                        graph.shuffleUseradjVertice(graph.userAdjVertices);
-                        --changeNum;
-                    }
+                newPop[i].fitness = calFit(newPop[i].chrom);
+                newPop[i].parent1 = mate1;
+                newPop[i].parent2 = mate2;
 
-                    if (tmpFit != Integer.MAX_VALUE) {
-                        newPop[i].fitness = calFit(newPop[i].chrom);
-                        newPop[i].parent1 = mate1;
-                        newPop[i].parent2 = mate2;
+                notGen = true;
 
-                        notGen = true;
+                if (newPop[i].fitness < bestCost) {
+                    bestCost = newPop[i].fitness;
+                    bestList = pathList;
+                    bestId = genId;
 
-                        if (newPop[i].fitness < bestCost) {
-                            bestCost = newPop[i].fitness;
-                            bestList = pathList;
-                            bestId = genId;
-                        }
-                    }
                 }
-
-
 
             }
         }
