@@ -50,7 +50,7 @@ public class PQDijkstra {
      * @param hashMaps 图相邻边的链表
      * @return 总共花费
      */
-    public int searchGraphPaths(List<NetworkVertex> userVertices, HashMap<Integer, Graph.Node>[] hashMaps){
+    public int searchGraphPaths(List<NetworkVertex> userVertices, HashMap<Integer, Edge>[] hashMaps){
         if (graph.serverIds.size() ==0 ){
             graph.serverIds.add(graph.userAdjVertices.get(0).id);
         }
@@ -77,7 +77,7 @@ public class PQDijkstra {
      * @param userId 用户节点
      * @return 路径集合
      */
-    public List<List> searchPath(int s, int userId, int data, HashMap<Integer, Graph.Node>[] hashMaps){
+    public List<List> searchPath(int s, int userId, int data, HashMap<Integer, Edge>[] hashMaps){
         int onePathWeight;
         int tempData = data;
 
@@ -108,7 +108,7 @@ public class PQDijkstra {
         return pathsList;
     }
 
-    private int searchOnePath(int s, int userId, int data, HashMap<Integer, Graph.Node>[] hashMaps){
+    private int searchOnePath(int s, int userId, int data, HashMap<Integer, Edge>[] hashMaps){
         init();
 
         Edge edge;
@@ -124,10 +124,10 @@ public class PQDijkstra {
             if (flag.get(temp) != null)
                 continue;
             flag.put(temp,true);
-            HashMap<Integer, Graph.Node> hashMap = hashMaps[temp];
+            HashMap<Integer, Edge> hashMap = hashMaps[temp];
             if (hashMap != null){
                 for (int id: hashMap.keySet()) {
-                    edge = hashMap.get(id).element;
+                    edge = hashMap.get(id);
                     int value = disto[temp]+edge.money;
 
                     //权重大于0或者找到松弛边
@@ -150,7 +150,7 @@ public class PQDijkstra {
      * @param userId 用户节点Id
      * @return 路径上的流量，如果找一条路径最小流量大于需求流量则返回所需求的流量，否则返回路径最小流量
      */
-    private int updateEdge(int userId, int data, HashMap<Integer, Graph.Node>[] hashMaps){
+    private int updateEdge(int userId, int data, HashMap<Integer, Edge>[] hashMaps){
         List<Integer> list = new ArrayList<>();
         int minMoney = 100;
         int minWeight = 101;
@@ -174,7 +174,7 @@ public class PQDijkstra {
         }
         //寻找路径中最小的流量
         for (; prepath[i] != -1; i=prepath[i]){
-            weight = hashMaps[prepath[i]].get(i).element.weight;
+            weight = hashMaps[prepath[i]].get(i).weight;
             if (minWeight > weight){
                 minWeight = weight;
             }
@@ -187,7 +187,7 @@ public class PQDijkstra {
         //更新路径的边，并添加路径到集合list中
         Edge edge;
         for (i=minId; prepath[i] != -1; i=prepath[i]){
-            edge = hashMaps[prepath[i]].get(i).element;
+            edge = hashMaps[prepath[i]].get(i);
             edge.weight -=minWeight;
             oneCost += minWeight*edge.money;
             list.add(i);

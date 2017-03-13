@@ -26,13 +26,22 @@ public class Deploy
         GraphProcess graphProcess = new GraphProcess(graph);
         graphProcess.updateGraph();
 
+        if (50 <= graph.networkVertexnum && graph.networkVertexnum  < 100 ){
+
+        }else if (100 <= graph.networkVertexnum && graph.networkVertexnum  < 200){
+
+        }else if (200 <= graph.networkVertexnum){
+
+        }
+
         GA ga = null;
-//        for (int i=0; i < 5; ++i) {
-            ga = new GA(30, 0.9, 0.6, 0.1, 0.2, 0.6, graph.networkVertexnum, 1000, graphProcess);
+        for (int i=0; i < 5; ++i) {
+            //参数：种群大小， 交叉概率， 1变0概率， 0变1概率， 服务器选择概率， 与概率
+            ga = new GA(30, 0.7, 0.6, 0.1, 0.2, 0.7, graph.networkVertexnum, 500, graphProcess);
             ga.startGA();
             list = ga.getBestList();
             System.out.println(ga.getBestCost()+" "+ga.getBestId());
-//        }
+        }
         return StringsUtils.ListT0Strings(list);
     }
 

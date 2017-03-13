@@ -18,15 +18,25 @@ public class GraphProcess {
 
     public GraphProcess(Graph graph){
         this.graph = graph;
+        graph.aliveNetVerticesNum = graph.networkVertexnum;
     }
 
     public Graph updateGraph(){
 
-        //流量统计
+        //构造邻边节点hashmap表
         addEdgesOfVertex();
+
+        //删除无效边
+        deleteUselessVertex();
+
+
+        //流量统计
         dataStatistic();
         dataSort();
         dataSortUserAdjVertices();
+        for (NetworkVertex networkVertex: graph.getNetworkVertices()){
+            System.out.println(networkVertex);
+        }
 
 
         //添加相邻边
@@ -87,6 +97,7 @@ public class GraphProcess {
         for (Edge edge: graph.getEdges()){
             copyEdge = edge.clone();
             graph.add(copyEdge.v, copyEdge.w, copyEdge);
+            copyEdge = edge.clone();
             graph.add(copyEdge.w, copyEdge.v, copyEdge);
         }
     }
@@ -118,20 +129,35 @@ public class GraphProcess {
     /**
      * 删除图中无效边，例如不和消费节点相连的一条边节点
      */
-//    private void deleteUselessVertex(){
-//        for (int i=0; i < graph.table.length; ++i) {
-//            if (graph.table[i] != null) {
-//                if (graph.table[i].size() == 1) {
-//                    if(graph.getNetworkVertices().get(graph.table[i].get(0).nextVertexId).neighborId == -1) {
-//                        System.out.println(graph.table[i].get(0).element);
-//                        graph.getEdges().remove(graph.table[i].get(0).element);
-//                        graph.table[i] = null;
-//                        --graph.edgenum;
-//                    }
-//                }
-//            }
-//        }
-//    }
+    private void deleteUselessVertex(){
+        Edge edge = null;
+        for (int i=0; i < graph.table.length; ++i) {
+            if (graph.table[i] != null) {
+                if (graph.table[i].size() == 1) {
+                    if(graph.getNetworkVertices().get(i).neighborId == -1) {
+                        for (Integer id: graph.table[i].keySet()) {
+                            edge = graph.table[i].get(id);
+                        }
+                        graph.table[i] = null;
+                        graph.getNetworkVertices().get(i).neighborId = -2;
+                        graph.aliveNetVerticesNum--;
+                        if (edge.w != i) {
+
+                            System.out.println(edge.v);
+                            graph.table[edge.w].remove(edge.v);
+                            graph.getEdges().remove(edge);
+                            --graph.edgenum;
+                        }else {
+                            System.out.println(edge.w);
+                            graph.table[edge.v].remove(edge.w);
+                            graph.getEdges().remove(edge);
+                            --graph.edgenum;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     public Graph getGraph(){
         return graph;

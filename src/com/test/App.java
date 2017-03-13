@@ -3,14 +3,12 @@ package com.test;
 import com.filetool.util.FileUtil;
 import com.xd.algorithm.GA;
 import com.xd.algorithm.PQDijkstra;
-import org.junit.Test;
-import com.xd.data.ServerPoint;
 import com.xd.data.GraphProcess;
 import com.xd.graph.Graph;
 import com.xd.graph.NetworkVertex;
 import com.xd.myutils.StringsUtils;
+import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -75,7 +73,11 @@ public class App {
         graphProcess.updateGraph();
 
 
+        graph.serverIds.add(0);
+        graph.serverIds.add(3);
 
+        PQDijkstra pqDijkstra = new PQDijkstra(graph, 1000);
+        pqDijkstra.searchGraphPaths(graph.userAdjVertices, graph.table);
 
 
         for (int i=0; i < graph.table.length; ++i){
@@ -88,15 +90,15 @@ public class App {
         }
 
         System.out.println("======================");
-        graphProcess.addEdgesOfVertex();
-        for (int i=0; i < graph.table.length; ++i){
-            if (graph.table[i]!=null) {
-                for(Integer id: graph.table[i].keySet()){
-                    System.out.print(i+"---"+id+"---"+graph.table[i].get(id)+":::");
-                }
-            }
-            System.out.println();
-        }
+//        graphProcess.addEdgesOfVertex();
+//        for (int i=0; i < graph.table.length; ++i){
+//            if (graph.table[i]!=null) {
+//                for(Integer id: graph.table[i].keySet()){
+//                    System.out.print(i+"---"+id+"---"+graph.table[i].get(id)+":::");
+//                }
+//            }
+//            System.out.println();
+//        }
 
     }
 
@@ -111,8 +113,7 @@ public class App {
         graphProcess.updateGraph();
 
         graph.serverIds.add(0);
-        graph.serverIds.add(1);
-        graph.serverIds.add(24);
+        graph.serverIds.add(3);
         PQDijkstra pqDijkstra = new PQDijkstra(graph, 1000);
 
         int cost = pqDijkstra.searchGraphPaths(graph.userAdjVertices, graph.table);
@@ -138,10 +139,8 @@ public class App {
     @Test
     public void deleteUselessVertexTest(){
         GraphProcess graphProcess = new GraphProcess(graph);
-
-        System.out.println(graph.getEdges().size());
         graphProcess.updateGraph();
-        System.out.println(graph.getEdges().size());
+
 
     }
 
@@ -156,15 +155,7 @@ public class App {
 //        }
     }
 
-    @Test
-    public void serverPointsTest(){
-        GraphProcess graphProcess = new GraphProcess(graph);
-        graphProcess.updateGraph();
-        ServerPoint serverPoint = new ServerPoint(graph);
-        serverPoint.getServerIds(0, graph.networkVertexnum);
-        for (int i=0; i < graph.serverIds.size(); ++i)
-            System.out.println(graph.getNetworkVertices().get(graph.serverIds.get(i)).data);
-    }
+
     @Test
     public void dataStatisticTest(){
         GraphProcess graphProcess = new GraphProcess(graph);

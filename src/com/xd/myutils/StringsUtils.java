@@ -1,15 +1,10 @@
 package com.xd.myutils;
 
-import com.filetool.util.FileUtil;
 import com.xd.graph.Edge;
 import com.xd.graph.Graph;
 import com.xd.graph.NetworkVertex;
 import com.xd.graph.UserVertex;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -114,24 +109,16 @@ public class StringsUtils {
         List<Integer> list = null;
         String[] strings = new String[lists.size()+2];
         strings[i++] = String.valueOf(lists.size());
-        strings[i++] = "\r\n";
+        strings[i++] = "";
         for (int j=0; j < lists.size(); ++i,++j){
-            if (j == (lists.size()-1)){
-                sb = new StringBuilder();
-                list = lists.get(j);
-                for (Integer id : list) {
-                    sb.append(id + " ");
-                }
-                strings[i] = sb.toString().trim();
+
+            sb = new StringBuilder();
+            list = lists.get(j);
+            for (Integer id : list) {
+                sb.append(id + " ");
             }
-            else {
-                sb = new StringBuilder();
-                list = lists.get(j);
-                for (Integer id : list) {
-                    sb.append(id + " ");
-                }
-                strings[i] = sb.toString().trim() + "\r\n";
-            }
+            strings[i] = sb.toString().trim();
+
         }
         return strings;
     }

@@ -6,7 +6,7 @@ import java.util.*;
  * @author Qian Shaofeng
  * @created on 2017/3/4.
  */
-public class Graph implements Cloneable{
+public class Graph{
     /**
      * 网络拓扑图中边的数量
      */
@@ -28,6 +28,11 @@ public class Graph implements Cloneable{
     public int serverValue;
 
     /**
+     * 图中存活的节点数
+     */
+    public int aliveNetVerticesNum;
+
+    /**
      * 用户总需求流量
      */
     public int userNeedData;
@@ -37,7 +42,7 @@ public class Graph implements Cloneable{
      * table是节点数组，每一个元素中存储着与该节点相邻边的信息，
      * 其每个数组元素中存放的是一个边的链表
      */
-    public HashMap<Integer, Node>[] table;
+    public HashMap<Integer, Edge>[] table;
 
 
     /**
@@ -105,7 +110,7 @@ public class Graph implements Cloneable{
     public void add(int firstId, int nextVertexId, Edge edge){
         if (table[firstId] == null)
             table[firstId] = new HashMap<>();
-        table[firstId].put(nextVertexId,new Node(edge));
+        table[firstId].put(nextVertexId,edge);
 
     }
 
@@ -113,29 +118,7 @@ public class Graph implements Cloneable{
         Collections.shuffle(list);
     }
 
-    public class Node implements Cloneable{
-
-        public Edge element;
-
-        public Node(Edge element){
-            this.element = element;
-        }
 
 
-        @Override
-        public String toString() {
-            return element+"---";
-        }
-
-        @Override
-        public Object clone() throws CloneNotSupportedException {
-            Node node = new Node(element);
-            return node;
-        }
-    }
-    @Override
-    public Object clone() throws CloneNotSupportedException {
-        return super.clone();
-    }
 
 }

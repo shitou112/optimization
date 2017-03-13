@@ -268,7 +268,9 @@ public class GA {
         statistics(oldPop);
         while (gen < generation_num){
             ++gen;
-            graph.shuffleUseradjVertice(graph.userAdjVertices);
+            if (gen % 3 ==0 ) {
+                graph.shuffleUseradjVertice(graph.userAdjVertices);
+            }
             if (gen % 100 == 0)
                 random = new Random(System.currentTimeMillis());
             oldMaxPop = maxPop;
