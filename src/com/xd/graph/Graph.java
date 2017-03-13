@@ -48,7 +48,7 @@ public class Graph{
     /**
      * 部署服务器的节点id
      */
-    public List<Integer> serverIds = new ArrayList<>();
+    public List<Integer> serverIds = new ArrayList<Integer>();
 
     /**
      * 与用户节点相邻的网络节点
@@ -109,7 +109,7 @@ public class Graph{
      */
     public void add(int firstId, int nextVertexId, Edge edge){
         if (table[firstId] == null)
-            table[firstId] = new HashMap<>();
+            table[firstId] = new HashMap<Integer, Edge>();
         table[firstId].put(nextVertexId,edge);
 
     }

@@ -29,10 +29,10 @@ public class StringsUtils {
         int lineNum = 0;
 
         Graph graph = new Graph();
-        List<UserVertex> userVextexList = new ArrayList<>();
-        List<NetworkVertex> networkVertexList = new ArrayList<>();
-        List<NetworkVertex> userAdjVertices = new LinkedList<>();
-        List<Edge> edgeList = new ArrayList<>();
+        List<UserVertex> userVextexList = new ArrayList<UserVertex>();
+        List<NetworkVertex> networkVertexList = new ArrayList<NetworkVertex>();
+        List<NetworkVertex> userAdjVertices = new LinkedList<NetworkVertex>();
+        List<Edge> edgeList = new ArrayList<Edge>();
 
 
         //分别读取网络拓扑的网络节点数、链路数、消费节点数

@@ -97,7 +97,7 @@ public class GA {
         }
 
         //使用dijkstra算法求得最小路径
-        PQDijkstra pqDijkstra = new PQDijkstra(graph, 1000);
+        PQDijkstra pqDijkstra = new PQDijkstra(graph, 10000);
 
         int sum = pqDijkstra.searchGraphPaths(graph.userAdjVertices, graph.table);
         pathList = pqDijkstra.getAllPathList();

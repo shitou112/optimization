@@ -24,8 +24,8 @@ public class PQDijkstra {
 
     //所有用户节点寻找服务器的花费
     private int sumcost;
-    private List<List> pathsList = new ArrayList<>();
-    private List<List> allPathList = new ArrayList<>();
+    private List<List> pathsList = new ArrayList<List>();
+    private List<List> allPathList = new ArrayList<List>();
     private PriorityQueue<Integer> pq;
 
     public PQDijkstra(Graph graph, int maxFindEdgeNum){
@@ -94,7 +94,7 @@ public class PQDijkstra {
         }
         if (onePathWeight == 101) {
             pathsList.clear();
-            List<Integer> cannotFindPathList = new ArrayList<>();
+            List<Integer> cannotFindPathList = new ArrayList<Integer>();
             cannotFindPathList.add(s);
             cannotFindPathList.add(userId);
             cannotFindPathList.add(data);
@@ -115,8 +115,8 @@ public class PQDijkstra {
 
         disto[s] = 0;
 
-        HashMap<Integer,Boolean> flag = new HashMap<>();
-        pq = new PriorityQueue<>();
+        HashMap<Integer,Boolean> flag = new HashMap<Integer, Boolean>();
+        pq = new PriorityQueue<Integer>();
         int searchNum = 0;
         Integer temp;
         pq.offer(s);
@@ -151,7 +151,7 @@ public class PQDijkstra {
      * @return 路径上的流量，如果找一条路径最小流量大于需求流量则返回所需求的流量，否则返回路径最小流量
      */
     private int updateEdge(int userId, int data, HashMap<Integer, Edge>[] hashMaps){
-        List<Integer> list = new ArrayList<>();
+        List<Integer> list = new ArrayList<Integer>();
         int minMoney = 100;
         int minWeight = 101;
         int minId = -1;

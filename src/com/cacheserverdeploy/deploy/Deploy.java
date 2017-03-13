@@ -28,36 +28,35 @@ public class Deploy
 
 
         if (50 <= graph.networkVertexnum && graph.networkVertexnum  < 100 ){
-            int tmp = (int)Math.round(0.9*graph.networkVertexnum);
+            int tmp = (int)Math.round(0.5*graph.networkVertexnum);
             if (graph.aliveNetVerticesNum > tmp){
                 graph.aliveNetVerticesNum = tmp;
             }
         }else if (100 <= graph.networkVertexnum && graph.networkVertexnum  < 200){
 
-            int tmp = (int)Math.round(0.8*graph.networkVertexnum);
+            int tmp = (int)Math.round(0.3*graph.networkVertexnum);
             if (graph.aliveNetVerticesNum > tmp){
                 graph.aliveNetVerticesNum = tmp;
             }
 
         }else if (200 <= graph.networkVertexnum){
 
-            int tmp = (int)Math.round(0.6*graph.networkVertexnum);
+            int tmp = (int)Math.round(0.2*graph.networkVertexnum);
             if (graph.aliveNetVerticesNum > tmp){
                 graph.aliveNetVerticesNum = tmp;
             }
 
         }
 
-        System.out.println("aliverNum: "+graph.aliveNetVerticesNum);
 
         GA ga = null;
-        for (int i=0; i < 1; ++i) {
+//        for (int i=0; i < 1; ++i) {
             //参数：种群大小，交叉概率,1变0概率，0变1概率，服务器选择概率， 与概率
-            ga = new GA(50, 0.7,  0.7,     0.1,      0.15,        0.7, graph.aliveNetVerticesNum, 500, graphProcess);
+            ga = new GA(30, 0.7,  0.7,     0.1,      0.15,        0.7, graph.aliveNetVerticesNum, 150, graphProcess);
             ga.startGA();
             list = ga.getBestList();
-            System.out.println(ga.getBestCost()+" "+ga.getBestId());
-        }
+//            System.out.println(ga.getBestCost()+" "+ga.getBestId());
+//        }
         return StringsUtils.ListT0Strings(list);
     }
 
