@@ -31,7 +31,7 @@ public class GA {
     // 繁殖代数
     private int generation_num;
 
-    private int sumFitness, minFitness, maxFitness, avgFitness;
+    private int sumFitness, minFitness = Integer.MAX_VALUE, maxFitness = Integer.MAX_VALUE, avgFitness;
 
     private double pro_init_server;
 
@@ -67,7 +67,6 @@ public class GA {
         this.generation_num = generation_num;
         this.oldPop = new Population[pop_size];
         this.newPop = new Population[pop_size];
-        this.random = new Random();
         this.graphProcess = graphProcess;
         this.graph = graphProcess.getGraph();
         this.serverNum = graphProcess.getGraph().getUserVertexs().size();
@@ -88,8 +87,13 @@ public class GA {
         graphProcess.addEdgesOfVertex();
         graph.serverIds.clear();
         for (int i=0; i < chr.length; ++i){
-            if (chr[i] == 1)
-                graph.serverIds.add(i);
+            if (chr[i] == 1) {
+                //原先代码
+//                graph.serverIds.add(i);
+
+                //改
+                graph.serverIds.add(graph.getNetworkVertices().get(i).id);
+            }
         }
 
         //使用dijkstra算法求得最小路径
@@ -128,7 +132,7 @@ public class GA {
 
 
     void initPop(){
-        int i,j,k;
+        int i,j;
         oldPop = new Population[pop_size];
         newPop = new Population[pop_size];
         Population population1,population2 ;
@@ -139,11 +143,13 @@ public class GA {
             newPop[i] = population2;
 
 
-            for (j=0; j < serverNum; j++){
+            for (j=0; j < Math.round(serverNum*1.2) && i < chrom_size; j++){
                 if (excise() <= pro_init_server) {
-                    k = random.nextInt(serverNum);
+                    oldPop[i].chrom[j] = 1;
+                    //原先代码
+//                    oldPop[i].chrom[graph.getNetworkVertices().get(k).id] = 1;
 
-                    oldPop[i].chrom[graph.getNetworkVertices().get(k).id] = 1;
+
                 }
             }
             oldPop[i].fitness = calFit(oldPop[i].chrom);
@@ -217,12 +223,14 @@ public class GA {
         if (excise() <= pro_xnor){
             xnor = random.nextInt(chrom_size);
         }
+
         for (j=0; j < xnor; ++j){
             newPop[i].chrom[j] = parent1[j];
         }
         for (; j < chrom_size; ++j){
             newPop[i].chrom[j] = parent1[j]==parent2[j]? parent1[j]:0;
         }
+
     }
 
     void generation(int genId){
@@ -230,61 +238,56 @@ public class GA {
 
         for (i=0; i < pop_size; i++){
 
-            if (i == minPop){
-                newPop[i].chrom = oldPop[i].chrom;
-                newPop[i].fitness = oldPop[i].fitness;
-                newPop[i].parent1 = oldPop[i].parent1;
-                newPop[i].parent2 = oldPop[i].parent2;
+            mate1 = selection();
+            mate2 = selection();
+            crossOver(oldPop[mate1].chrom, oldPop[mate2].chrom, i);
+            xnor(oldPop[mate1].chrom, oldPop[mate2].chrom, i);
+            for (j = 0; j < chrom_size; ++j) {
+                newPop[i].chrom[j] = mutation(newPop[i].chrom[j]);
             }
-            else {
-                mate1 = selection();
-                mate2 = selection();
-                crossOver(oldPop[mate1].chrom, oldPop[mate2].chrom, i);
-                xnor(oldPop[mate1].chrom, oldPop[mate2].chrom, i);
-                for (j = 0; j < chrom_size; ++j) {
-                    newPop[i].chrom[j] = mutation(newPop[i].chrom[j]);
-                }
 
-                newPop[i].fitness = calFit(newPop[i].chrom);
-                newPop[i].parent1 = mate1;
-                newPop[i].parent2 = mate2;
+            newPop[i].fitness = calFit(newPop[i].chrom);
+            newPop[i].parent1 = mate1;
+            newPop[i].parent2 = mate2;
 
 
-                if (newPop[i].fitness < bestCost) {
-                    bestCost = newPop[i].fitness;
-                    bestList = pathList;
-                    bestId = genId;
-                }
+            if (newPop[i].fitness < bestCost) {
+                bestCost = newPop[i].fitness;
+                bestList = pathList;
+                bestId = genId;
             }
+
 
 
         }
     }
 
     public void startGA(){
-        int gen = 0, oldMaxPop, oldMax;
+        int gen = 0, oldMinPop, oldMin;
         random = new Random(System.currentTimeMillis());
         initPop();
         statistics(oldPop);
         while (gen < generation_num){
             ++gen;
-            if (gen % 3 ==0 ) {
+//            if (gen % 3 ==0 ) {
                 graph.shuffleUseradjVertice(graph.userAdjVertices);
-            }
+//            }
             if (gen % 100 == 0)
                 random = new Random(System.currentTimeMillis());
-            oldMaxPop = maxPop;
-            oldMax = maxFitness;
+            oldMinPop = minPop;
+            oldMin = minFitness;
+
+
             generation(gen);
             statistics(newPop);
 
-            if (maxFitness < oldMax){
+            if (minFitness > oldMin){
                 for (int k =0 ; k < chrom_size; ++k){
-                    newPop[minPop].chrom[k] = oldPop[oldMaxPop].chrom[k];
+                    newPop[minPop].chrom[k] = oldPop[oldMinPop].chrom[k];
                 }
-                newPop[minPop].fitness = oldPop[oldMaxPop].fitness;
-                newPop[minPop].parent1 = oldPop[oldMaxPop].parent1;
-                newPop[minPop].parent2 = oldPop[oldMaxPop].parent2;
+                newPop[minPop].fitness = oldPop[oldMinPop].fitness;
+                newPop[minPop].parent1 = oldPop[oldMinPop].parent1;
+                newPop[minPop].parent2 = oldPop[oldMinPop].parent2;
                 statistics(newPop);
             }
         }

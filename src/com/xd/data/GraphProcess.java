@@ -14,6 +14,7 @@ public class GraphProcess {
     private Graph graph;
     private List datalist;
     private int sumData;
+    public double A = 0.7, B = 0.3;
 
 
     public GraphProcess(Graph graph){
@@ -34,16 +35,9 @@ public class GraphProcess {
         dataStatistic();
         dataSort();
         dataSortUserAdjVertices();
-        for (NetworkVertex networkVertex: graph.getNetworkVertices()){
-            System.out.println(networkVertex);
-        }
-
-
-        //添加相邻边
-//        addEdgesOfVertex();
-
-        //删除无效节点
-//        deleteUselessVertex();
+//        for (NetworkVertex networkVertex: graph.getNetworkVertices()){
+//            System.out.println(networkVertex);
+//        }
 
 
         return graph;
@@ -64,9 +58,12 @@ public class GraphProcess {
      *计算各个节点的服务器得分
      */
     private void computeServerScore(){
-        double A = 0.7, B = 0.3;
         for (NetworkVertex networkVertex: graph.getNetworkVertices()){
-            networkVertex.serverScore = A*(networkVertex.data*1.0/sumData) + B*(networkVertex.userDatas*1.0/graph.userNeedData);
+            int tmp = 1;
+            if (networkVertex.neighborId == -2){
+                tmp = -1;
+            }
+            networkVertex.serverScore = A*(networkVertex.data*1.0/sumData) + B*(networkVertex.userDatas*1.0/graph.userNeedData) + tmp;
         }
     }
 
@@ -143,12 +140,10 @@ public class GraphProcess {
                         graph.aliveNetVerticesNum--;
                         if (edge.w != i) {
 
-                            System.out.println(edge.v);
                             graph.table[edge.w].remove(edge.v);
                             graph.getEdges().remove(edge);
                             --graph.edgenum;
                         }else {
-                            System.out.println(edge.w);
                             graph.table[edge.v].remove(edge.w);
                             graph.getEdges().remove(edge);
                             --graph.edgenum;
