@@ -14,12 +14,15 @@ public class GraphProcess {
     private Graph graph;
     private List datalist;
     private int sumData;
-    public double A = 0.7, B = 0.3;
+
+    private int[] adjKingVertexData;
+    public double A = 0.2, B = 0.5, C=0.3;
 
 
     public GraphProcess(Graph graph){
         this.graph = graph;
         graph.aliveNetVerticesNum = graph.networkVertexnum;
+        adjKingVertexData = new int[graph.networkVertexnum];
     }
 
     public Graph updateGraph(){
@@ -30,17 +33,44 @@ public class GraphProcess {
         //删除无效边
         deleteUselessVertex();
 
-
-        //流量统计
         dataStatistic();
+
         dataSort();
-        dataSortUserAdjVertices();
+
+        // 流量统计
+
+//        dataSortUserAdjVertices();
+        computeAliveVertices();
 //        for (NetworkVertex networkVertex: graph.getNetworkVertices()){
 //            System.out.println(networkVertex);
 //        }
 
 
+
         return graph;
+    }
+
+    public void computeAliveVertices(){
+        if (50 <= graph.networkVertexnum && graph.networkVertexnum  < 100 ){
+            int tmp = (int)Math.round(0.7*graph.networkVertexnum);
+            if (graph.aliveNetVerticesNum > tmp){
+                graph.aliveNetVerticesNum = tmp;
+            }
+        }else if (100 <= graph.networkVertexnum && graph.networkVertexnum  < 200){
+
+            int tmp = (int)Math.round(0.4*graph.networkVertexnum);
+            if (graph.aliveNetVerticesNum > tmp){
+                graph.aliveNetVerticesNum = tmp;
+            }
+
+        }else if (200 <= graph.networkVertexnum){
+
+            int tmp = (int)Math.round(0.3*graph.networkVertexnum);
+            if (graph.aliveNetVerticesNum > tmp){
+                graph.aliveNetVerticesNum = tmp;
+            }
+
+        }
     }
 
     /**
@@ -58,12 +88,18 @@ public class GraphProcess {
      *计算各个节点的服务器得分
      */
     private void computeServerScore(){
-        for (NetworkVertex networkVertex: graph.getNetworkVertices()){
+        NetworkVertex networkVertex;
+
+        for (int i=0; i < graph.table.length; ++i){
             int tmp = 1;
+            networkVertex = graph.getNetworkVertices().get(i);
             if (networkVertex.neighborId == -2){
                 tmp = -1;
             }
-            networkVertex.serverScore = A*(networkVertex.data*1.0/sumData) + B*(networkVertex.userDatas*1.0/graph.userNeedData) + tmp;
+
+//            System.out.println(adjKingVertexData[i]);
+//            System.out.println(i+": "+A*(networkVertex.userDatas)+"---"+B*(networkVertex.data)+"---"+(B-C)*adjKingVertexData[i]);
+            networkVertex.serverScore = A*(networkVertex.userDatas) + B*(networkVertex.data) + (B-C)*adjKingVertexData[i] + 100*tmp;
         }
     }
 
@@ -78,6 +114,15 @@ public class GraphProcess {
         Edge edge = null;
         for (int i=0; i < graph.edgenum; ++i){
             edge = edgelist.get(i);
+
+            if (graph.getNetworkVertices().get(edge.v).neighborId > -1){
+                adjKingVertexData[edge.w] += edge.weight;
+            }
+
+            if (graph.getNetworkVertices().get(edge.w).neighborId > -1){
+                adjKingVertexData[edge.v] += edge.weight;
+            }
+
             networkVertexList.get(edge.v).data += edge.weight;
             networkVertexList.get(edge.w).data += edge.weight;
             sumData +=edge.weight*2;
@@ -94,7 +139,7 @@ public class GraphProcess {
         for (Edge edge: graph.getEdges()){
             copyEdge = edge.clone();
             graph.add(copyEdge.v, copyEdge.w, copyEdge);
-            copyEdge = edge.clone();
+//            copyEdge = edge.clone();
             graph.add(copyEdge.w, copyEdge.v, copyEdge);
         }
     }

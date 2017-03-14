@@ -97,7 +97,7 @@ public class GA {
         }
 
         //使用dijkstra算法求得最小路径
-        PQDijkstra pqDijkstra = new PQDijkstra(graph, 10000);
+        PQDijkstraImprove pqDijkstra = new PQDijkstraImprove(graph, 1000);
 
         int sum = pqDijkstra.searchGraphPaths(graph.userAdjVertices, graph.table);
         pathList = pqDijkstra.getAllPathList();
@@ -269,9 +269,9 @@ public class GA {
         statistics(oldPop);
         while (gen < generation_num){
             ++gen;
-//            if (gen % 3 ==0 ) {
+            if (gen % 3 ==0 ) {
                 graph.shuffleUseradjVertice(graph.userAdjVertices);
-//            }
+            }
             if (gen % 100 == 0)
                 random = new Random(System.currentTimeMillis());
             oldMinPop = minPop;

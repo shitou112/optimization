@@ -1,9 +1,6 @@
-package com.test;
+package test;
 
-import com.xd.graph.Graph;
 import org.junit.Test;
-
-import java.util.Random;
 
 /**
  * @author Qian Shaofeng
