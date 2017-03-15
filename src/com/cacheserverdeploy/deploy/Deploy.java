@@ -29,8 +29,8 @@ public class Deploy
         GA ga = null;
 //        for (int i=0; i < 5; ++i) {
             //参数：种群大小，交叉概率,1变0概率，0变1概率，服务器选择概率， 与概率
-//            ga = new GA(30, 0.8,  0.6,     0.1,      0.1,        0.7, graph.aliveNetVerticesNum, 200, graphProcess);
-            ga = new GA(30, 0.7,  0.7,     0.1,      0.2,        0.7, graph.aliveNetVerticesNum, 200, graphProcess);
+            ga = new GA(30, 0.8,  0.6,     0.1,      0.1,        0.7, graph.aliveNetVerticesNum, 300, graphProcess);
+//            ga = new GA(30, 0.7,  0.7,     0.1,      0.2,        0.7, graph.aliveNetVerticesNum, 200, graphProcess);
             ga.startGA();
             list = ga.getBestList();
 //            System.out.println(ga.getBestCost()+" "+ga.getBestId());

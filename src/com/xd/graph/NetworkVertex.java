@@ -13,6 +13,7 @@ public class NetworkVertex extends Vertex implements Comparable<NetworkVertex>{
     public double userScore;
 
 
+
     public NetworkVertex(int id, int data){
         this.id = id;
         this.data = data;

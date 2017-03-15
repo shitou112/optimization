@@ -2,6 +2,7 @@ package com.xd.algorithm;
 
 import com.xd.data.GraphProcess;
 import com.xd.graph.Graph;
+import com.xd.graph.NetworkVertex;
 
 import java.util.List;
 import java.util.Random;
@@ -86,18 +87,20 @@ public class GA {
     public int calFit(int[] chr){
         graphProcess.addEdgesOfVertex();
         graph.serverIds.clear();
+        NetworkVertex networkVertex = null;
         for (int i=0; i < chr.length; ++i){
             if (chr[i] == 1) {
                 //原先代码
 //                graph.serverIds.add(i);
 
                 //改
-                graph.serverIds.add(graph.getNetworkVertices().get(i).id);
+                networkVertex = graph.getNetworkVertices().get(i);
+                graph.serverIds.put(networkVertex.id, true);
             }
         }
 
         //使用dijkstra算法求得最小路径
-        PQDijkstraImprove pqDijkstra = new PQDijkstraImprove(graph, 1000);
+        FastPQDijkstra pqDijkstra = new FastPQDijkstra(graph);
 
         int sum = pqDijkstra.searchGraphPaths(graph.userAdjVertices, graph.table);
         pathList = pqDijkstra.getAllPathList();
@@ -123,6 +126,7 @@ public class GA {
                 minPop = i;
             }
         }
+
         for (i=0; i < pop_size; ++i){
             sumFitness += (maxFitness - pop[i].fitness);
 
@@ -290,6 +294,15 @@ public class GA {
                 newPop[minPop].parent2 = oldPop[oldMinPop].parent2;
                 statistics(newPop);
             }
+
+//            for (int i=0; i < pop_size; ++i){
+//                for (int j=0; j < chrom_size; ++j){
+//                    oldPop[i].chrom[j] = newPop[i].chrom[j];
+//                }
+//                oldPop[i].fitness = newPop[i].fitness;
+//                oldPop[i].parent1 = newPop[i].parent1;
+//                oldPop[i].parent2 = newPop[i].parent2;
+//            }
         }
 
 

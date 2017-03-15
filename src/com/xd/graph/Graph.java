@@ -48,7 +48,7 @@ public class Graph{
     /**
      * 部署服务器的节点id
      */
-    public List<Integer> serverIds = new ArrayList<Integer>();
+    public HashMap<Integer, Boolean> serverIds = new HashMap<Integer, Boolean>();
 
     /**
      * 与用户节点相邻的网络节点
@@ -103,14 +103,12 @@ public class Graph{
     /**
      * 向id号顶点中添加一条链路边
      *
-     * @param firstId 当前节点id号
-     * @param nextVertexId 下个节点的id号
      * @param edge 添加的链路边
      */
-    public void add(int firstId, int nextVertexId, Edge edge){
-        if (table[firstId] == null)
-            table[firstId] = new HashMap<Integer, Edge>();
-        table[firstId].put(nextVertexId,edge);
+    public void add(Edge edge){
+        if (table[edge.v] == null)
+            table[edge.v] = new HashMap<Integer, Edge>();
+        table[edge.v].put(edge.w,edge);
 
     }
 

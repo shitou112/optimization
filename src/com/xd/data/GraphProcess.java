@@ -137,10 +137,9 @@ public class GraphProcess {
         graph.table = new HashMap[graph.networkVertexnum];
         Edge copyEdge;
         for (Edge edge: graph.getEdges()){
-            copyEdge = edge.clone();
-            graph.add(copyEdge.v, copyEdge.w, copyEdge);
-//            copyEdge = edge.clone();
-            graph.add(copyEdge.w, copyEdge.v, copyEdge);
+
+            graph.add(new Edge(edge.v, edge.w, edge.weight, edge.money));
+            graph.add(new Edge(edge.w,edge.v,edge.weight,edge.money));
         }
     }
 

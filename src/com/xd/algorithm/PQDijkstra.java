@@ -52,7 +52,7 @@ public class PQDijkstra {
      */
     public int searchGraphPaths(List<NetworkVertex> userVertices, HashMap<Integer, Edge>[] hashMaps){
         if (graph.serverIds.size() ==0 ){
-            graph.serverIds.add(graph.userAdjVertices.get(0).id);
+            graph.serverIds.put(graph.userAdjVertices.get(0).id, true);
         }
         for (NetworkVertex userVertex : userVertices){
 
@@ -99,7 +99,7 @@ public class PQDijkstra {
             cannotFindPathList.add(userId);
             cannotFindPathList.add(data);
 
-            graph.serverIds.add(s);
+            graph.serverIds.put(s, true);
             pathsList.add(cannotFindPathList);
 
             return pathsList;
@@ -160,12 +160,12 @@ public class PQDijkstra {
         oneCost = 0;
 
         //寻找距离源点最近的服务器点id
-        for (Integer id: graph.serverIds){
-            if (minMoney > disto[id]){
-                minMoney = disto[id];
-                minId = id;
-            }
-        }
+//        for (Integer id: graph.serverIds){
+//            if (minMoney > disto[id]){
+//                minMoney = disto[id];
+//                minId = id;
+//            }
+//        }
         int weight = 101;
         int i = minId;
 

@@ -2,6 +2,8 @@ package test;
 
 import org.junit.Test;
 
+import java.util.HashMap;
+
 /**
  * @author Qian Shaofeng
  * @created on 2017/3/7.
@@ -12,9 +14,8 @@ public class Mytest {
     }
     @Test
     public void test(){
-        Mytest mytest = new Mytest();
-        Student student = mytest.new Student();
-        System.out.println(student.i);
+        HashMap<Integer, Boolean> hashMap = new HashMap<>();
+        System.out.println(hashMap.get(0));
     }
 
 }

@@ -5,9 +5,24 @@ package com.xd.graph;
  * @created on 2017/3/4.
  */
 public class Edge implements Cloneable{
+    /**
+     * 边的起点
+     */
     public int v;
+
+    /**
+     * 边的终点
+     */
     public int w;
+
+    /**
+     * 边的最大流量
+     */
     public int weight;
+
+    /**
+     * 边的花费
+     */
     public int money;
 
     public Edge(int v, int w, int weight, int money){
@@ -27,4 +42,6 @@ public class Edge implements Cloneable{
     public String toString() {
         return v+" "+w+" "+weight+" "+money;
     }
+
+
 }
