@@ -130,7 +130,7 @@ public class FastPQDijkstra {
         pq = new PriorityQueue<EdgeValue>();
 
 
-        pq.add(new EdgeValue(s, 0));
+        pq.add(new EdgeValue(s, 0, 0));
 
         EdgeValue edgeValue = null;
         Edge edge = null;
@@ -139,7 +139,7 @@ public class FastPQDijkstra {
 
 
             edgeValue = pq.poll();
-            flag.put(edgeValue.start,true);
+
 
 
             if (graph.serverIds.get(edgeValue.start) != null) {
@@ -152,22 +152,23 @@ public class FastPQDijkstra {
 
 
             edgeHashMap = hashMaps[edgeValue.start];
-            if (edgeHashMap != null){
+            if (edgeHashMap != null && flag.get(edgeValue.start) == null){
                 for (Integer id: edgeHashMap.keySet()){
-                    if (flag.get(id) == null) {
-
-                        edge = edgeHashMap.get(id);
-                        if (edge.weight >0 ) {
-                            int value = disto[edgeValue.start] + edge.money;
-                            if (value < disto[id]) {
-                                disto[id] = value;
-                                prepath[id] = edgeValue.start;
-                                minWeight[id] = minWeight[edgeValue.start] < edge.weight ? minWeight[edgeValue.start] : edge.weight;
+                        if (flag.get(id) == null) {
+                            edge = edgeHashMap.get(id);
+                            if (edge.weight > 0) {
+                                int value = disto[edgeValue.start] + edge.money;
+                                if (value < disto[id]) {
+                                    disto[id] = value;
+                                    prepath[id] = edgeValue.start;
+                                    minWeight[id] = minWeight[edgeValue.start] < edge.weight ? minWeight[edgeValue.start] : edge.weight;
+                                }
+                                pq.add(new EdgeValue(id, edge.weight, value));
                             }
-                            pq.add(new EdgeValue(id, value));
                         }
-                    }
+
                 }
+                flag.put(edgeValue.start,true);
             }
 
         }
@@ -210,11 +211,11 @@ public class FastPQDijkstra {
         list.add(myweight);
         pathsList.add(list);
 
-//        for (Integer id: list){
-//            System.out.print(id+" ");
-//        }
-//        System.out.print("oneceos"+oneCost);
-//        System.out.println();
+        for (Integer id: list){
+            System.out.print(id+" ");
+        }
+        System.out.print("oneceos"+oneCost);
+        System.out.println();
 
         oneVertexCost += oneCost;
 
@@ -224,12 +225,19 @@ public class FastPQDijkstra {
 
     public class EdgeValue implements Comparable<EdgeValue>{
         public int start;
+        public int weight;
         public int value;
-        public EdgeValue(int start, int value){
+        public EdgeValue(int start, int weight, int value){
             this.start = start;
+            this.weight = weight;
             this.value = value;
         }
 
+        /**
+         * 优先队列排序基准，先以路径的价格优先比较，之后对链路边权重的大小优先比较，价格小的在前，价格一样的，链路边权重大的在前
+         * @param o 排序对象
+         * @return
+         */
         @Override
         public int compareTo(EdgeValue o) {
             if (o.value < this.value) {
@@ -237,6 +245,10 @@ public class FastPQDijkstra {
             } else if (o.value > this.value) {
                 return -1;
             } else {
+                if (o.weight > this.weight)
+                    return 1;
+                else if(o.weight < this.weight)
+                    return -1;
                 return 0;
             }
         }

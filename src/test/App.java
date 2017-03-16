@@ -38,7 +38,7 @@ public class App {
                 graphProcess.A = A[i];
                 graphProcess.B = B[j];
                 graphProcess.updateGraph();
-                ga = new GA(30, 0.8,  0.6,     0.1,      0.1,        0.7, graph.aliveNetVerticesNum, 200, graphProcess);
+//                ga = new GA(30, 0.8,  0.6,     0.1,      0.1,        0.7, graph.aliveNetVerticesNum, 200, graphProcess);
                 ga.startGA();
                 if (ga.getBestCost() < bestcost) {
                     bestcost = ga.getBestCost();
@@ -72,7 +72,7 @@ public class App {
                 for (int m=0; m < pro_better_mutution.length;++m){
                     for (int n=0; n < pro_init_server.length; ++n){
                         for (int k=0; k < pro_xnor.length; ++k){
-                            ga =new GA(30, pro_cross[i], pro_mutution[j], pro_better_mutution[m], pro_init_server[n], pro_xnor[k],graph.aliveNetVerticesNum, 200, graphProcess);
+//                            ga =new GA(30, pro_cross[i], pro_mutution[j], pro_better_mutution[m], pro_init_server[n], pro_xnor[k],graph.aliveNetVerticesNum, 200, graphProcess);
                             ga.startGA();
                             if (ga.getBestCost() < bestcost){
                                 bestcost = ga.getBestCost();
@@ -174,14 +174,14 @@ public class App {
                 System.out.println();
             }
         }
-//        System.out.println("===");
+        System.out.println("===");
 //        for (List<Integer> list: pqDijkstra.getAllPathList()){
 //            for (Integer id: list){
 //                System.out.print(id+" ");
 //            }
 //            System.out.println();
 //        }
-//        for (Integer id: graph.serverIds){
+//        for (Integer id: graph.serverIds.keySet()){
 //            System.out.print(id+" ");
 //        }
 //        System.out.println();
