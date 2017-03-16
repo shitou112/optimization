@@ -156,9 +156,9 @@ public class App {
         }
 
         System.out.println("=====");
-        graph.serverIds.put(0, true);
-        graph.serverIds.put(1, true);
-        graph.serverIds.put(24, true);
+//        graph.serverIds.put(0, true);
+//        graph.serverIds.put(1, true);
+//        graph.serverIds.put(24, true);
         FastPQDijkstra pqDijkstra = new FastPQDijkstra(graph);
 
         int cost = pqDijkstra.searchGraphPaths(graph.userAdjVertices, graph.table);

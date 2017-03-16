@@ -68,6 +68,7 @@ public class FastPQDijkstra {
 
         sumcost += graph.serverIds.size()*graph.serverValue;
 
+
         return sumcost;
     }
 
@@ -211,11 +212,11 @@ public class FastPQDijkstra {
         list.add(myweight);
         pathsList.add(list);
 
-        for (Integer id: list){
-            System.out.print(id+" ");
-        }
-        System.out.print("oneceos"+oneCost);
-        System.out.println();
+//        for (Integer id: list){
+//            System.out.print(id+" ");
+//        }
+//        System.out.print("oneceos"+oneCost);
+//        System.out.println();
 
         oneVertexCost += oneCost;
 

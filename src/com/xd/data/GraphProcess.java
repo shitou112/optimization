@@ -41,6 +41,7 @@ public class GraphProcess {
 
 //        dataSortUserAdjVertices();
         computeAliveVertices();
+
 //        for (NetworkVertex networkVertex: graph.getNetworkVertices()){
 //            System.out.println(networkVertex);
 //        }

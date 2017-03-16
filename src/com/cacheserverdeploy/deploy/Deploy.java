@@ -2,6 +2,7 @@ package com.cacheserverdeploy.deploy;
 
 
 import com.xd.algorithm.GA;
+import com.xd.algorithm.NewGA;
 import com.xd.data.GraphProcess;
 import com.xd.graph.Graph;
 import com.xd.myutils.StringsUtils;
@@ -26,10 +27,11 @@ public class Deploy
         GraphProcess graphProcess = new GraphProcess(graph);
         graphProcess.updateGraph();
 
-        GA ga = null;
-        for (int i=0; i < 5; ++i) {
+        NewGA ga = null;
+        for (int i=0; i < 1; ++i) {
             //参数：种群大小，存活网络节点个数, 代数，交叉概率,1变0概率，0变1概率，服务器选择概率， 与概率
-            ga = new GA(30, graph.aliveNetVerticesNum, 200, 0.8, 0.6, 0.1, 0.1, 0.6, graphProcess);
+//            ga = new GA(31, graph.aliveNetVerticesNum, 1000, 0.7, 0.6, 0.1, 0.1, 0.6, graphProcess);
+            ga = new NewGA(30, 0.7,  0.4,     0.1,      0.2,        0.6, graph.aliveNetVerticesNum, 1000, graphProcess);
             ga.startGA();
             list = ga.getBestList();
             System.out.println(ga.getBestCost()+" "+ga.getBestId());
