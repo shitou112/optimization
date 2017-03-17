@@ -53,20 +53,20 @@ public class GraphProcess {
 
     public void computeAliveVertices(){
         if (50 <= graph.networkVertexnum && graph.networkVertexnum  < 100 ){
-            int tmp = (int)Math.round(0.5*graph.networkVertexnum);
+            int tmp = (int)Math.round(0.7*graph.networkVertexnum);
             if (graph.aliveNetVerticesNum > tmp){
                 graph.aliveNetVerticesNum = tmp;
             }
         }else if (100 <= graph.networkVertexnum && graph.networkVertexnum  < 200){
 
-            int tmp = (int)Math.round(0.4*graph.networkVertexnum);
+            int tmp = (int)Math.round(0.6*graph.networkVertexnum);
             if (graph.aliveNetVerticesNum > tmp){
                 graph.aliveNetVerticesNum = tmp;
             }
 
         }else if (200 <= graph.networkVertexnum){
 
-            int tmp = (int)Math.round(0.3*graph.networkVertexnum);
+            int tmp = (int)Math.round(0.5*graph.networkVertexnum);
             if (graph.aliveNetVerticesNum > tmp){
                 graph.aliveNetVerticesNum = tmp;
             }
