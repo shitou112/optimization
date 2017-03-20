@@ -2,6 +2,7 @@ package com.xd.algorithm;
 
 import com.xd.data.GraphProcess;
 import com.xd.graph.Graph;
+import com.xd.graph.NetworkVertex;
 
 import java.util.List;
 import java.util.Random;
@@ -31,7 +32,9 @@ public class NewGA {
     // 繁殖代数
     private int generation_num;
 
-    private int sumFitness, minFitness = Integer.MAX_VALUE, maxFitness = Integer.MAX_VALUE, avgFitness;
+
+    private double sumFitness, avgFitness, usageRate, minFitness = Double.MAX_VALUE, maxFitness = Double.MAX_VALUE;
+
 
     private double pro_init_server;
 
@@ -39,7 +42,7 @@ public class NewGA {
 
     private Random random;
 
-    private Population[] oldPop, newPop;
+    public Population[] oldPop, newPop;
 
     private Graph graph;
 
@@ -53,16 +56,12 @@ public class NewGA {
 
     private int serverNum;
 
+    PQDijkstra pqDijkstra;
 
 
-    public NewGA(int pop_size, double pro_cross, double pro_mutate, double pro_better_mutate,double pro_init_server, double pro_xnor, int chrom_size,
-              int generation_num, GraphProcess graphProcess){
+
+    public NewGA(int pop_size, int chrom_size, int generation_num, GraphProcess graphProcess){
         this.pop_size = pop_size;
-        this.pro_cross = pro_cross;
-        this.pro_mutate = pro_mutate;
-        this.pro_better_mutate = pro_better_mutate;
-        this.pro_xnor = pro_xnor;
-        this.pro_init_server = pro_init_server;
         this.chrom_size = chrom_size;
         this.generation_num = generation_num;
         this.oldPop = new Population[pop_size];
@@ -70,69 +69,130 @@ public class NewGA {
         this.graphProcess = graphProcess;
         this.graph = graphProcess.getGraph();
         this.serverNum = graphProcess.getGraph().getUserVertexs().size();
+        pqDijkstra = new PQDijkstra(graph);
+        pqDijkstra.initPath(graph.userAdjVertices, graph.table);
     }
 
 
-    public int calServerNum(int[] chr){
-        int num=0;
-        for (int i=0; i < chr.length; ++i){
-            if (chr[i] == 1){
-                ++num;
-            }
-        }
-        return num;
-    }
-
-    public int calFit(int[] chr){
+    public int fixCalFit(int[] chr){
         graphProcess.addEdgesOfVertex();
         graph.serverIds.clear();
+        NetworkVertex networkVertex = null;
         for (int i=0; i < chr.length; ++i){
             if (chr[i] == 1) {
-                //原先代码
-//                graph.serverIds.add(i);
-
-                //改
-                graph.serverIds.put(graph.getNetworkVertices().get(i).id, true);
+                networkVertex = graph.getNetworkVertices().get(i);
+                graph.serverIds.put(networkVertex.id, true);
             }
         }
+
+        int startServerNum = graph.serverIds.size()+1;
 
         //使用dijkstra算法求得最小路径
         FastPQDijkstra pqDijkstra = new FastPQDijkstra(graph);
 
         int sum = pqDijkstra.searchGraphPaths(graph.userAdjVertices, graph.table);
         pathList = pqDijkstra.getAllPathList();
+
+        int endServerNum = graph.serverIds.size()+1;
+
+        usageRate = endServerNum  *1.0/ startServerNum;
         return sum;
     }
 
+    public int calFit(int[] chr){
+        graph.serverIds.clear();
+        NetworkVertex networkVertex = null;
+        for (int i=0; i < chr.length; ++i){
+            if (chr[i] == 1) {
+                networkVertex = graph.getNetworkVertices().get(i);
+                graph.serverIds.put(networkVertex.id, true);
+            }
+        }
 
-    public void statistics(Population[] pop){
+        int startServerNum = graph.serverIds.size()+1;
+
+
+        int sum = pqDijkstra.startPQDijkstra(graph.userAdjVertices, graph.serverIds);
+//        pathList = pqDijkstra.getAllPathList();
+
+        int endServerNum = graph.serverIds.size()+1;
+
+        usageRate = endServerNum  *1.0/ startServerNum;
+//        System.out.println(sum);
+        return sum;
+    }
+
+    public double getUsageRate(){
+        return  usageRate;
+    }
+
+
+    public void statistics(Population[] pop, int gen){
         double tmpFitness;
-        int i=0;
+        double sumFitness1=0;
+        sumFitness = 0;
+        maxFitness = 0;
+        minFitness = Double.MAX_VALUE;
 
-        for (; i < pop_size; ++i){
-            sumFitness += pop[i].fitness;
+        for (int i=0; i < pop_size; ++i){
             tmpFitness = pop[i].fitness;
 
             if (tmpFitness > maxFitness){
-                maxFitness = pop[i].fitness;
+                maxFitness = tmpFitness;
                 maxPop = i;
             }
 
+
             if (tmpFitness < minFitness){
-                minFitness = pop[i].fitness;
+                minFitness = tmpFitness;
                 minPop = i;
             }
-        }
-        for (i=0; i < pop_size; ++i){
-            sumFitness += (maxFitness - pop[i].fitness);
 
         }
-        avgFitness = sumFitness / pop_size;
+
+        pop[minPop].cost = fixCalFit(pop[minPop].chrom);
+        pop[minPop].fitness = pop[minPop].cost * getUsageRate();
+
+        System.out.println(pop[minPop]);
+
+        for (int i=0; i < pop_size; ++i){
+            sumFitness += 1- pop[i].fitness /(maxFitness + minFitness);
+            sumFitness1 += pop[i].fitness;
+        }
+
+        avgFitness = sumFitness1 / pop_size;
+
+
+        double pc0 = 0.3, pc1 = 0.6, pc2 = 0.9, para1 = 0.78, para2 = 0.0005;
+        // 自适应交叉率
+        if (minFitness/avgFitness > para1 && minFitness / maxFitness >= pc1 / pc2){
+            pro_cross = pc0;
+
+        }
+        else if (minFitness / avgFitness > para1 && minFitness / maxFitness > para2 && minFitness / maxFitness < pc1 / pc2){
+            pro_cross = pc2 - (pc1 - pc2) / (1 - minFitness/maxFitness);
+        }
+        else {
+            pro_cross = pc2;
+        }
+
+        //自适应变异率
+        double pm0 = 0.0001,pm1 = 0.001, pm2 = 0.1;
+        if (minFitness/avgFitness > para1 && minFitness / maxFitness >= pm1 / pm2){
+            pro_mutate = pm2;
+        }
+        else if (minFitness / avgFitness > para1 && minFitness / maxFitness > para2 && minFitness / maxFitness < pm1 / pm2){
+            pro_mutate = pm2 - (pm2 - pm1) / (1 - minFitness/maxFitness);
+        }
+        else {
+            pro_mutate = pm0;
+        }
+
     }
 
 
     void initPop(){
-        int i,j;
+        int i,j=0;
         oldPop = new Population[pop_size];
         newPop = new Population[pop_size];
         Population population1,population2 ;
@@ -142,20 +202,23 @@ public class NewGA {
             oldPop[i] = population1;
             newPop[i] = population2;
 
-
-            for (j=0; j < Math.round(serverNum*1.2) && i < chrom_size; j++){
-                if (excise() <= pro_init_server) {
+            for (j=0; j < chrom_size; ++j) {
+                if (excise() < graph.userVertexnums*0.6/graph.aliveNetVerticesNum) {
                     oldPop[i].chrom[j] = 1;
-                    //原先代码
-//                    oldPop[i].chrom[graph.getNetworkVertices().get(k).id] = 1;
-
-
                 }
             }
-            oldPop[i].fitness = calFit(oldPop[i].chrom);
-            oldPop[i].parent1 = 0;
-            oldPop[i].parent2 = 0;
-            oldPop[i].cross = 0;
+//            j = random.nextInt(chrom_size);
+//            oldPop[i].chrom[j] = 1;
+
+            oldPop[i].maxServerNum++;
+
+            oldPop[i].cost = calFit(oldPop[i].chrom);
+            if (oldPop[i].cost < bestCost) {
+                bestCost = oldPop[i].cost;
+                bestList = pathList;
+            }
+            oldPop[i].fitness = oldPop[i].cost * getUsageRate();
+
         }
     }
 
@@ -173,122 +236,119 @@ public class NewGA {
 
         wheelPos = randNumber*sumFitness;
         do {
-            partsum += (maxFitness - oldPop[i].fitness);
+            partsum += ( 1 - oldPop[i].fitness / (minFitness + maxFitness));
             i++;
         }while((partsum < wheelPos) && i < pop_size);
         return i-1;
     }
 
-    boolean crossOver(int[] parent1, int[] parent2, int i){
+    boolean crossOver(int[] parent1, int[] parent2, int chr1, int chr2){
         int j;
-        int crossPos;
+        int crossPos1, crossPos2;
         if (excise() <= pro_cross){
-            crossPos = random.nextInt(chrom_size);
-        }
-        else {
-            crossPos = chrom_size - 1;
-        }
+            crossPos1 = random.nextInt(chrom_size);
+            while ((crossPos2 = random.nextInt(chrom_size))==crossPos1){
 
-        for (j = 0; j <= crossPos; j++){
-            newPop[i].chrom[j] = parent1[j];
-        }
+            }
+            if (crossPos1 > crossPos2){
+                int temp = crossPos1;
+                crossPos1 = crossPos2;
+                crossPos2 = temp;
+            }
 
-        for (; j < chrom_size; j++){
-            newPop[i].chrom[j] = parent2[j];
-        }
+            for (j = 0; j <= crossPos1; j++){
+                newPop[chr1].chrom[j] = parent1[j];
+                newPop[chr2].chrom[j] = parent2[j];
+            }
 
-        newPop[i].cross = crossPos;
-        return true;
+            for (; j < crossPos2; j++){
+                newPop[chr1].chrom[j] = parent2[j];
+                newPop[chr2].chrom[j] = parent1[j];
+            }
+            for (; j < chrom_size; j++){
+                newPop[chr1].chrom[j] = parent1[j];
+                newPop[chr2].chrom[j] = parent2[j];
+            }
+            return true;
+        }
+        return false;
+
     }
 
-    int mutation(int alleles){
+    int mutation( int alleles){
         double pp = excise();
-        if (pp <= pro_mutate){
-            if (alleles==1)
-                alleles = 0;
-            else {
-                if (pp <= pro_better_mutate){
-                    if (alleles == 0)
-                        alleles =1;
-                }
-            }
+
+        if (pp <= pro_mutate) {
+            return 1 - alleles;
         }
         return alleles;
 
     }
 
-    void xnor(int[] parent1, int[] parent2, int i){
-        int j;
-        int xnor = 0;
-        if (excise() <= pro_xnor){
-            xnor = random.nextInt(chrom_size);
-        }
 
-        for (j=0; j < xnor; ++j){
-            newPop[i].chrom[j] = parent1[j];
-        }
-        for (; j < chrom_size; ++j){
-            newPop[i].chrom[j] = parent1[j]==parent2[j]? parent1[j]:0;
-        }
+    void generation(int gen){
+        int mate1,mate2;
 
-    }
 
-    void generation(int genId){
-        int i,j,mate1,mate2;
 
-        for (i=0; i < pop_size; i++){
+        for (int i=1; i < pop_size; i = i+2){
 
             mate1 = selection();
             mate2 = selection();
-            crossOver(oldPop[mate1].chrom, oldPop[mate2].chrom, i);
-            xnor(oldPop[mate1].chrom, oldPop[mate2].chrom, i);
-            for (j = 0; j < chrom_size; ++j) {
-                newPop[i].chrom[j] = mutation(newPop[i].chrom[j]);
+            crossOver(oldPop[mate1].chrom, oldPop[mate2].chrom, i, i+1);
+            for (int j = 0; j < chrom_size; ++j) {
+                newPop[i].chrom[j] = mutation( newPop[i].chrom[j]);
+                newPop[i+1].chrom[j] = mutation( newPop[i+1].chrom[j]);
+            }
+            newPop[i].cost = calFit(newPop[i].chrom);
+            newPop[i].fitness = newPop[i].cost * getUsageRate();
+            if (newPop[i].cost < bestCost) {
+                bestCost = newPop[i].cost;
+                bestList = getBestList();
+                bestId = gen;
             }
 
-            newPop[i].fitness = calFit(newPop[i].chrom);
-            newPop[i].parent1 = mate1;
-            newPop[i].parent2 = mate2;
+            newPop[i+1].cost = calFit(newPop[i+1].chrom);
+            newPop[i+1].fitness = newPop[i+1].cost * getUsageRate();
 
-
-            if (newPop[i].fitness < bestCost) {
-                bestCost = newPop[i].fitness;
+            if (newPop[i+1].cost < bestCost){
+                bestCost = newPop[i+1].cost;
                 bestList = pathList;
-                bestId = genId;
+                bestId = gen;
             }
-
-
-
         }
+
+
+        for (int j=0; j < chrom_size; ++j){
+            newPop[0].chrom[j] = oldPop[minPop].chrom[j];
+        }
+        newPop[0].cost = oldPop[minPop].cost;
+        newPop[0].fitness = oldPop[minPop].fitness;
+
     }
 
     public void startGA(){
-        int gen = 0, oldMinPop, oldMin;
         random = new Random(System.currentTimeMillis());
+        int gen = 0;
         initPop();
-        statistics(oldPop);
+
+        statistics(oldPop, gen);
         while (gen < generation_num){
             ++gen;
-            if (gen % 3 ==0 ) {
-                graph.shuffleUseradjVertice(graph.userAdjVertices);
-            }
-            if (gen % 100 == 0)
-                random = new Random(System.currentTimeMillis());
-            oldMinPop = minPop;
-            oldMin = minFitness;
 
+//            if (gen % 3 ==0 ) {
+//                graph.shuffleUseradjVertice(graph.userAdjVertices);
+//            }
 
             generation(gen);
-            statistics(newPop);
+            statistics(newPop, gen);
 
-            if (minFitness > oldMin){
-                for (int k =0 ; k < chrom_size; ++k){
-                    newPop[minPop].chrom[k] = oldPop[oldMinPop].chrom[k];
+            for (int i=0; i < pop_size; ++i){
+                for (int j=0; j < chrom_size; ++j){
+                    oldPop[i].chrom[j] = newPop[i].chrom[j];
                 }
-                newPop[minPop].fitness = oldPop[oldMinPop].fitness;
-                newPop[minPop].parent1 = oldPop[oldMinPop].parent1;
-                newPop[minPop].parent2 = oldPop[oldMinPop].parent2;
-                statistics(newPop);
+                oldPop[i].cost = newPop[i].cost;
+                oldPop[i].fitness = newPop[i].fitness;
             }
         }
 
@@ -297,16 +357,31 @@ public class NewGA {
 
     public class Population{
         // 基因组
-        int chrom[];
+        public int chrom[];
 
-        // 适应度
-        int fitness;
+        // 花费
+        int cost;
+
+        int maxServerNum;
+
+        double fitness;
+
+        public int[] mutateStates;
 
 
-        // 双亲，交叉节点
-        int parent1, parent2, cross;
         public Population(int size){
             chrom = new int[size];
+            mutateStates = new int[size];
+        }
+
+        @Override
+        public String toString() {
+            String str = "";
+            for (int i =0; i<chrom_size;++i){
+                str+=chrom[i]+" ";
+            }
+            str += cost+" fit "+ fitness;
+            return str;
         }
     }
 

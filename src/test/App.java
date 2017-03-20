@@ -18,8 +18,23 @@ import java.util.List;
  * @created on 2017/3/4.
  */
 public class App {
-    String FILEPATH = "E:\\case_example\\mycase.txt";
+    String FILEPATH = "E:\\case_example\\case3.txt";
     Graph graph = StringsUtils.readStrings(FileUtil.read(FILEPATH,null));
+
+    @Test
+    public void PQTest(){
+        GraphProcess graphProcess = new GraphProcess(graph);
+        graphProcess.updateGraph();
+
+        PQDijkstra pq = new PQDijkstra(graph);
+        graph.serverIds.put(0,true);
+        graph.serverIds.put(3,true);
+        graph.serverIds.put(22,true);
+
+        pq.initPath(graph.userAdjVertices, graph.table);
+        int cost = pq.startPQDijkstra(graph.userAdjVertices, graph.serverIds);
+        System.out.println(cost);
+    }
 
     @Test
     public void ABParameterTest(){
@@ -110,7 +125,7 @@ public class App {
 //        graph.serverIds.add(0);
 //        graph.serverIds.add(3);
 
-        PQDijkstra pqDijkstra = new PQDijkstra(graph, 1000);
+        PQDijkstra pqDijkstra = new PQDijkstra(graph);
         pqDijkstra.searchGraphPaths(graph.userAdjVertices, graph.table);
 
 
@@ -156,35 +171,46 @@ public class App {
         }
 
         System.out.println("=====");
-//        graph.serverIds.put(0, true);
-//        graph.serverIds.put(1, true);
-//        graph.serverIds.put(24, true);
+        graph.serverIds.put(10, true);
+        graph.serverIds.put(35, true);
+        graph.serverIds.put(29, true);
+        graph.serverIds.put(22, true);
+        graph.serverIds.put(26, true);
         FastPQDijkstra pqDijkstra = new FastPQDijkstra(graph);
+
+//        graph.shuffleUseradjVertice(graph.userAdjVertices);
+//        for (NetworkVertex networkVertex:graph.userAdjVertices){
+//            System.out.print(networkVertex.id+" ");
+//        }
+//        System.out.println();
+
+//        pqDijkstra.initPath(graph.userAdjVertices, graph.table);
+//        int cost = pqDijkstra.startPQDijkstra(graph.userAdjVertices, graph.serverIds);
 
         int cost = pqDijkstra.searchGraphPaths(graph.userAdjVertices, graph.table);
 
-        System.out.println("=====");
-
-        for (int i=0; i < graph.table.length; ++i){
-            if (graph.table[i] != null) {
-                System.out.print(i+"::: ");
-                for (Integer id : graph.table[i].keySet()) {
-                    System.out.print(graph.table[i].get(id) + "----");
-                }
-                System.out.println();
-            }
-        }
-        System.out.println("===");
-//        for (List<Integer> list: pqDijkstra.getAllPathList()){
-//            for (Integer id: list){
-//                System.out.print(id+" ");
+//        System.out.println("=====");
+//
+//        for (int i=0; i < graph.table.length; ++i){
+//            if (graph.table[i] != null) {
+//                System.out.print(i+"::: ");
+//                for (Integer id : graph.table[i].keySet()) {
+//                    System.out.print(graph.table[i].get(id) + "----");
+//                }
+//                System.out.println();
 //            }
-//            System.out.println();
 //        }
-//        for (Integer id: graph.serverIds.keySet()){
-//            System.out.print(id+" ");
-//        }
-//        System.out.println();
+        System.out.println("===");
+        for (List<Integer> list: pqDijkstra.getAllPathList()){
+            for (Integer id: list){
+                System.out.print(id+" ");
+            }
+            System.out.println();
+        }
+        for (Integer id: graph.serverIds.keySet()){
+            System.out.print(id+" ");
+        }
+        System.out.println();
 //        long end = System.currentTimeMillis();
 
 //

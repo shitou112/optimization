@@ -138,18 +138,17 @@ public class FastPQDijkstra {
         HashMap<Integer, Edge> edgeHashMap = null;
         while (!pq.isEmpty()){
 
-
             edgeValue = pq.poll();
-
-
 
             if (graph.serverIds.get(edgeValue.start) != null) {
                 return edgeValue.start;
             }
 
 
-            if (disto[edgeValue.start]*minWeight[edgeValue.start] > graph.serverValue)
-                continue;
+            if (disto[edgeValue.start]*minWeight[edgeValue.start] > graph.serverValue) {
+//                System.out.println(s+"----"+disto[edgeValue.start]*minWeight[edgeValue.start]);
+                break;
+            }
 
 
             edgeHashMap = hashMaps[edgeValue.start];
@@ -173,6 +172,7 @@ public class FastPQDijkstra {
             }
 
         }
+//        System.out.println("------11111111111111111------");
         return -1;
 
     }

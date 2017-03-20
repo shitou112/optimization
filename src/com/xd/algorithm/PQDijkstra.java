@@ -12,36 +12,44 @@ import java.util.*;
  */
 public class PQDijkstra {
     private Graph graph;
-    private int maxFindEdgeNum;
-    private int[] disto;
-    private int[] prepath;
+    private int num_Size;
+    private int[] vertexWeight;
 
-    //一次寻找服务器的花费
-    private int oneCost;
+    public HashMap<Integer, UserAdjNetworksPath> userAdjNetworksPathMaps;
 
-    //一个用户节点寻找服务器的花费
-    private int oneVertexCost;
+    private PriorityQueue<EdgeValue> pq;
 
-    //所有用户节点寻找服务器的花费
-    private int sumcost;
-    private List<List> pathsList = new ArrayList<List>();
-    private List<List> allPathList = new ArrayList<List>();
-    private PriorityQueue<Integer> pq;
 
-    public PQDijkstra(Graph graph, int maxFindEdgeNum){
-        this.maxFindEdgeNum = maxFindEdgeNum;
+    public PQDijkstra(Graph graph){
         this.graph = graph;
-        prepath = new int[graph.networkVertexnum];
-        disto = new int[graph.networkVertexnum];
+        userAdjNetworksPathMaps = new HashMap<>();
+        num_Size = graph.networkVertexnum;
+        vertexWeight = new int[num_Size];
     }
 
-    private void init(){
-        for (int i=0; i < prepath.length; ++i){
-            disto[i] = 100;
-            prepath[i] = -1;
+
+
+    private void init(UserAdjNetworksPath userAdjNetworksPath){
+        for (int i=0; i < num_Size; ++i){
+            userAdjNetworksPath.unitCost[i] = 101;
+            userAdjNetworksPath.prePath[i] = -1;
+            userAdjNetworksPath.minWeight[i] = 101;
         }
     }
 
+    public void initPath(List<NetworkVertex> userVertices, HashMap<Integer, Edge>[] hashMaps){
+        searchGraphPaths(userVertices, hashMaps);
+    }
+
+    public int startPQDijkstra(List<NetworkVertex> userAdjNetworks, HashMap<Integer, Boolean> serverMaps){
+
+        HashMap<Integer, UserAdjNetworksPath> hashMap = new HashMap<>();
+        for (Integer id: userAdjNetworksPathMaps.keySet()){
+            hashMap.put(id, userAdjNetworksPathMaps.get(id).clone());
+        }
+
+        return sumcost(userAdjNetworks, serverMaps, hashMap);
+    }
 
     /**
      * 利用clone的集合来操作图，保存图内的相关信息
@@ -50,157 +58,243 @@ public class PQDijkstra {
      * @param hashMaps 图相邻边的链表
      * @return 总共花费
      */
-    public int searchGraphPaths(List<NetworkVertex> userVertices, HashMap<Integer, Edge>[] hashMaps){
+    public void searchGraphPaths(List<NetworkVertex> userVertices, HashMap<Integer, Edge>[] hashMaps){
         if (graph.serverIds.size() ==0 ){
             graph.serverIds.put(graph.userAdjVertices.get(0).id, true);
         }
+        UserAdjNetworksPath userAdjNetworksPath;
         for (NetworkVertex userVertex : userVertices){
 
             //一个节点寻找服务器的花费
-            oneVertexCost = 0;
-            allPathList.addAll(searchPath(userVertex.id, userVertex.neighborId, userVertex.userDatas, hashMaps));
+            userAdjNetworksPath = new UserAdjNetworksPath(num_Size);
+            findPath(userVertex.id, userAdjNetworksPath, hashMaps);
+            userAdjNetworksPathMaps.put(userVertex.id, userAdjNetworksPath);
+
+//            for (int i=0; i < num_Size; ++i){
+//                System.out.print(i+":"+userAdjNetworksPath.minWeight[i]+" ");
+//            }
+//            System.out.println();
         }
 
-        sumcost += graph.serverIds.size()*graph.serverValue;
-
-        return sumcost;
     }
 
-    public List<List> getAllPathList(){
-        return allPathList;
-    }
 
-    /**
-     *
-     * @param s 路径源点
-     * @param data 需求的流量
-     * @param userId 用户节点
-     * @return 路径集合
-     */
-    public List<List> searchPath(int s, int userId, int data, HashMap<Integer, Edge>[] hashMaps){
-        int onePathWeight;
-        int tempData = data;
+    private void findPath(int s, UserAdjNetworksPath uap, HashMap<Integer, Edge>[] hashMaps){
+        init(uap);
 
-        pathsList.clear();
+        uap.unitCost[s] = 0;
+
+        HashMap<Integer,Boolean> flag = new HashMap<>();
+        pq = new PriorityQueue<>();
 
 
-        onePathWeight = searchOnePath(s, userId, tempData, hashMaps);
+        pq.add(new EdgeValue(s, Integer.MAX_VALUE, 0));
 
+        EdgeValue edgeValue = null;
+        Edge edge = null;
+        HashMap<Integer, Edge> edgeHashMap = null;
+        while (!pq.isEmpty()){
 
-        //判断选择的服务器节点能否满足用户需求
-        while (tempData > onePathWeight){
-            tempData -= onePathWeight;
-            onePathWeight = searchOnePath(s, userId, tempData, hashMaps);
-        }
-        if (onePathWeight == 101) {
-            pathsList.clear();
-            List<Integer> cannotFindPathList = new ArrayList<Integer>();
-            cannotFindPathList.add(s);
-            cannotFindPathList.add(userId);
-            cannotFindPathList.add(data);
+            edgeValue = pq.poll();
 
-            graph.serverIds.put(s, true);
-            pathsList.add(cannotFindPathList);
+            if (uap.unitCost[edgeValue.start] > graph.serverValue) {
+//                System.out.println(s+"----"+disto[edgeValue.start]*minWeight[edgeValue.start]);
+                break;
+            }
 
-            return pathsList;
-        }
-        sumcost += oneVertexCost;
-        return pathsList;
-    }
-
-    private int searchOnePath(int s, int userId, int data, HashMap<Integer, Edge>[] hashMaps){
-        init();
-
-        Edge edge;
-
-        disto[s] = 0;
-
-        HashMap<Integer,Boolean> flag = new HashMap<Integer, Boolean>();
-        pq = new PriorityQueue<Integer>();
-        int searchNum = 0;
-        Integer temp;
-        pq.offer(s);
-        while (searchNum < maxFindEdgeNum && ((temp = pq.poll())!=null)){
-            if (flag.get(temp) != null)
-                continue;
-            flag.put(temp,true);
-            HashMap<Integer, Edge> hashMap = hashMaps[temp];
-            if (hashMap != null){
-                for (int id: hashMap.keySet()) {
-                    edge = hashMap.get(id);
-                    int value = disto[temp]+edge.money;
-
-                    //权重大于0或者找到松弛边
-                    if (edge.weight>0 && disto[id] > value){
-                        disto[id] = value;
-                        prepath[id] = temp;
+            edgeHashMap = hashMaps[edgeValue.start];
+            if (edgeHashMap != null && flag.get(edgeValue.start) == null){
+                for (Integer id: edgeHashMap.keySet()){
+                    if (flag.get(id) == null) {
+                        edge = edgeHashMap.get(id);
+                        if (edge.weight > 0) {
+                            int value = uap.unitCost[edgeValue.start] + edge.money;
+                            if (value < uap.unitCost[id]) {
+                                uap.unitCost[id] = value;
+                                uap.prePath[id] = edgeValue.start;
+                                uap.minWeight[id] = uap.minWeight[edgeValue.start] < edge.weight ? uap.minWeight[edgeValue.start] : edge.weight;
+                            }
+                            pq.add(new EdgeValue(id, edge.weight, value));
+                        }
                     }
-                    pq.offer(id);
+
+                }
+                flag.put(edgeValue.start,true);
+            }
+
+        }
+
+    }
+
+
+    private int sumcost(List<NetworkVertex> userAdjNetworks, HashMap<Integer, Boolean> serverMaps, HashMap<Integer, UserAdjNetworksPath> userAdjNetworksPathMaps){
+        for (Integer id: userAdjNetworksPathMaps.keySet()){
+            System.out.println(id);
+            UserAdjNetworksPath us = userAdjNetworksPathMaps.get(id);
+            System.out.println(us);
+        }
+        System.out.println("=====");
+
+        UserAdjNetworksPath userAdjNetworksPath;
+        int sumCost = 0, maxCost, minCost, minId = 101, userneeddata, oneCost;
+        HashMap<Integer, Integer> useData;
+
+        for (NetworkVertex networkVertex: userAdjNetworks){
+
+            userAdjNetworksPath = userAdjNetworksPathMaps.get(networkVertex.id);
+            userneeddata = networkVertex.userDatas;
+            minId = 101;
+            useData = new HashMap<>();
+            oneCost = 0;
+
+            System.out.print(networkVertex.id+" ");
+
+            while (userneeddata > 0) {
+                minId = 101;
+                maxCost = 0;
+                minCost = Integer.MAX_VALUE;
+
+                for (Integer id : serverMaps.keySet()) {
+                    if (userAdjNetworksPath.minWeight[id] > 0) {
+                        if (maxCost < userAdjNetworksPath.unitCost[id]) {
+                            maxCost = userAdjNetworksPath.unitCost[id];
+                        }
+                        if (minCost > userAdjNetworksPath.unitCost[id]) {
+                            minCost = userAdjNetworksPath.unitCost[id];
+                            minId = id;
+                        }
+                    }
+                }
+
+                if (minId != 101) {
+                    System.out.print(minId+" ");
+                    if (userneeddata < userAdjNetworksPath.minWeight[minId]) {
+                        oneCost += userneeddata * userAdjNetworksPath.unitCost[minId];
+                        useData.put(minId, userneeddata);
+                        userneeddata -= userneeddata;
+                    }
+                    else {
+                        oneCost += userAdjNetworksPath.minWeight[minId] * userAdjNetworksPath.unitCost[minId];
+                        useData.put(minId, userAdjNetworksPath.minWeight[minId]);
+                        userneeddata -= userAdjNetworksPath.minWeight[minId];
+
+                        int minValue = Integer.MAX_VALUE, recordId=-1;
+                        for (Integer id: graph.table[minId].keySet()){
+                            if (id != networkVertex.id){
+                                if(userAdjNetworksPath.unitCost[id]+graph.table[minId].get(id).money < minValue){
+                                    recordId = id;
+                                    minValue = userAdjNetworksPath.unitCost[id]+graph.table[minId].get(id).money;
+                                }
+                            }
+                        }
+                        if (recordId != -1){
+                            userAdjNetworksPath.unitCost[minId] = minValue;
+                            userAdjNetworksPath.minWeight[minId] = userAdjNetworksPath.minWeight[recordId] < graph.table[minId].get(recordId).weight?
+                                    userAdjNetworksPath.minWeight[recordId]:graph.table[minId].get(recordId).weight;
+                        }
+                    }
+                }
+                else {
+                    break;
                 }
             }
-            ++searchNum;
-        }
-        return updateEdge(userId, data, hashMaps);
-    }
 
-    /**
-     * 更新边的权重并将路径保存到list集合中
-     *
-     * @param data 需求的流量
-     * @param userId 用户节点Id
-     * @return 路径上的流量，如果找一条路径最小流量大于需求流量则返回所需求的流量，否则返回路径最小流量
-     */
-    private int updateEdge(int userId, int data, HashMap<Integer, Edge>[] hashMaps){
-        List<Integer> list = new ArrayList<Integer>();
-        int minMoney = 100;
-        int minWeight = 101;
-        int minId = -1;
+            if (minId != 101) {
 
-        //一次寻找的服务器的花费
-        oneCost = 0;
+                System.out.print(oneCost);
 
-        //寻找距离源点最近的服务器点id
-//        for (Integer id: graph.serverIds){
-//            if (minMoney > disto[id]){
-//                minMoney = disto[id];
-//                minId = id;
-//            }
-//        }
-        int weight = 101;
-        int i = minId;
-
-        if (i==-1) {
-            return weight;
-        }
-        //寻找路径中最小的流量
-        for (; prepath[i] != -1; i=prepath[i]){
-            weight = hashMaps[prepath[i]].get(i).weight;
-            if (minWeight > weight){
-                minWeight = weight;
+                vertexWeight[minId] -= userneeddata;
+                sumCost += oneCost;
+            }
+            else {
+                graph.serverIds.put(networkVertex.id,true);
+                sumCost += graph.serverValue;
             }
 
+            System.out.println();
+
         }
-
-        if (minWeight > data)
-            minWeight = data;
-
-        //更新路径的边，并添加路径到集合list中
-        Edge edge;
-        for (i=minId; prepath[i] != -1; i=prepath[i]){
-            edge = hashMaps[prepath[i]].get(i);
-            edge.weight -=minWeight;
-            oneCost += minWeight*edge.money;
-            list.add(i);
-        }
-
-        list.add(i);
-        list.add(userId);
-        list.add(minWeight);
-        pathsList.add(list);
-
-        oneVertexCost += oneCost;
-
-        return minWeight;
+        sumCost += graph.serverValue*graph.serverIds.size();
+        return sumCost;
     }
 
+
+    public class UserAdjNetworksPath implements Cloneable{
+        int[] unitCost;
+        int[] prePath;
+        int[] minWeight;
+
+        public UserAdjNetworksPath(int num_size){
+            unitCost = new int[num_size];
+            prePath = new int[num_size];
+            minWeight = new int[num_size];
+        }
+
+        @Override
+        public String toString() {
+            String str = "";
+            for (int i=0; i < num_Size; ++i)
+                str+="id:"+i+" "+unitCost[i];
+            str+="\n";
+            for (int i=0; i < num_Size; ++i)
+                str+="id:"+i+" "+minWeight[i];
+            str+="\n";
+            return str;
+        }
+
+        @Override
+        protected UserAdjNetworksPath clone(){
+            UserAdjNetworksPath userAdjNetworksPath = new UserAdjNetworksPath(num_Size);
+
+            userAdjNetworksPath.prePath = prePath;
+
+            int[] weight = new int[num_Size];
+            int[] cost = new int[num_Size];
+
+            for (int i=0; i < num_Size; ++i){
+                weight[i] = minWeight[i];
+                cost[i] = unitCost[i];
+            }
+            userAdjNetworksPath.minWeight = weight;
+            userAdjNetworksPath.unitCost = cost;
+
+            return userAdjNetworksPath;
+        }
+    }
+
+    public class EdgeValue implements Comparable<EdgeValue>{
+        public int start;
+        public int weight;
+        public int value;
+        public EdgeValue(int start, int weight, int value){
+            this.start = start;
+            this.weight = weight;
+            this.value = value;
+        }
+
+        /**
+         * 优先队列排序基准，先以路径的价格优先比较，之后对链路边权重的大小优先比较，价格小的在前，价格一样的，链路边权重大的在前
+         * @param o 排序对象
+         * @return
+         */
+        @Override
+        public int compareTo(EdgeValue o) {
+            if (o.value < this.value) {
+                return 1;
+            } else if (o.value > this.value) {
+                return -1;
+            } else {
+                if (o.weight > this.weight)
+                    return 1;
+                else if(o.weight < this.weight)
+                    return -1;
+                return 0;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return start +"---" + value;
+        }
+    }
 }

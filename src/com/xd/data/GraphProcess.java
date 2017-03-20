@@ -16,7 +16,9 @@ public class GraphProcess {
     private int sumData;
 
     private int[] adjKingVertexData;
-    public double A = 0.2, B = 0.5, C=0.3;
+
+    //A是用户需求占比， B是王权节点占比， C是其他流量占比
+    public double A = 0.6, B = 0.5, C=0.2;
 
 
     public GraphProcess(Graph graph){
@@ -35,16 +37,18 @@ public class GraphProcess {
 
         dataStatistic();
 
-        dataSort();
+//        dataSort();
+//
+//        // 流量统计
+//
+////        dataSortUserAdjVertices();
+//        computeAliveVertices();
 
-        // 流量统计
-
-//        dataSortUserAdjVertices();
-        computeAliveVertices();
-
+//        int i=0;
 //        for (NetworkVertex networkVertex: graph.getNetworkVertices()){
-//            System.out.println(networkVertex);
+//            System.out.println((i++)+"   "+networkVertex);
 //        }
+//        System.out.println(graph.aliveNetVerticesNum);
 
 
 
@@ -53,20 +57,18 @@ public class GraphProcess {
 
     public void computeAliveVertices(){
         if (50 <= graph.networkVertexnum && graph.networkVertexnum  < 100 ){
-            int tmp = (int)Math.round(0.7*graph.networkVertexnum);
+            int tmp = (int)Math.round(0.8*graph.networkVertexnum);
             if (graph.aliveNetVerticesNum > tmp){
                 graph.aliveNetVerticesNum = tmp;
             }
-        }else if (100 <= graph.networkVertexnum && graph.networkVertexnum  < 200){
-
-            int tmp = (int)Math.round(0.6*graph.networkVertexnum);
+        }else if (100 <= graph.networkVertexnum && graph.networkVertexnum  < 300){
+            int tmp = (int)Math.round(0.7*graph.networkVertexnum);
             if (graph.aliveNetVerticesNum > tmp){
                 graph.aliveNetVerticesNum = tmp;
             }
 
         }else if (200 <= graph.networkVertexnum){
-
-            int tmp = (int)Math.round(0.5*graph.networkVertexnum);
+            int tmp = (int)Math.round(0.4*graph.networkVertexnum);
             if (graph.aliveNetVerticesNum > tmp){
                 graph.aliveNetVerticesNum = tmp;
             }

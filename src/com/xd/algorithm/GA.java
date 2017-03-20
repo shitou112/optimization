@@ -21,10 +21,6 @@ public class GA {
     // 变异概率
     private double pro_mutate;
 
-    private double pro_better_mutate;
-
-    //同或概率
-    private double pro_xnor;
 
     // 染色体长度
     private int chrom_size;
@@ -36,13 +32,11 @@ public class GA {
     private double sumFitness, avgFitness, usageRate, minFitness = Double.MAX_VALUE, maxFitness = Double.MAX_VALUE;
 
 
-    private double pro_init_server;
-
     private int minPop, maxPop;
 
     private Random random;
 
-    private Population[] oldPop, newPop;
+    public Population[] oldPop, newPop;
 
     private Graph graph;
 
@@ -54,7 +48,7 @@ public class GA {
 
     private int bestId;
 
-    private int serverNum;
+    private int maxServerNum;
 
 
 
@@ -66,7 +60,7 @@ public class GA {
         this.newPop = new Population[pop_size];
         this.graphProcess = graphProcess;
         this.graph = graphProcess.getGraph();
-        this.serverNum = graphProcess.getGraph().getUserVertexs().size();
+        this.maxServerNum = graphProcess.getGraph().getUserVertexs().size();
     }
 
 
@@ -92,7 +86,8 @@ public class GA {
 
         int endServerNum = graph.serverIds.size()+1;
 
-        usageRate = endServerNum  *1.0/ startServerNum;
+//        usageRate = endServerNum  *1.0/ startServerNum;
+        usageRate = 1.0;
         return sum;
     }
 
@@ -124,11 +119,7 @@ public class GA {
 
         }
 
-        for (int i=0; i < chrom_size; ++i){
-            oldPop[maxPop].chrom[i] = oldPop[minPop].chrom[i];
-            oldPop[maxPop].cost = oldPop[minPop].cost;
-            oldPop[maxPop].fitness  = oldPop[minPop].fitness;
-        }
+//        System.out.println(pop[minPop]);
 
         for (int i=0; i < pop_size; ++i){
             sumFitness += 1- pop[i].fitness /(maxFitness + minFitness);
@@ -138,7 +129,7 @@ public class GA {
         avgFitness = sumFitness1 / pop_size;
 
 
-        double pc0 = 0.5, pc1 = 0.6, pc2 = 0.9, para1 = 0.78, para2 = 0.0005;
+        double pc0 = 0.3, pc1 = 0.6, pc2 = 0.9, para1 = 0.78, para2 = 0.0005;
         // 自适应交叉率
         if (minFitness/avgFitness > para1 && minFitness / maxFitness >= pc1 / pc2){
             pro_cross = pc0;
@@ -152,7 +143,7 @@ public class GA {
         }
 
         //自适应变异率
-        double pm0 = 0.0001,pm1 = 0.001, pm2 = 0.1;
+        double pm0 = 0.0001,pm1 = 0.001, pm2 = 0.15;
         if (minFitness/avgFitness > para1 && minFitness / maxFitness >= pm1 / pm2){
             pro_mutate = pm2;
         }
@@ -178,10 +169,11 @@ public class GA {
             newPop[i] = population2;
 
             for (j=0; j < chrom_size; ++j) {
-                if (excise() < (graph.userAdjVertices.size() * (0.2))) {
+                if (excise() < (0.2)) {
                     oldPop[i].chrom[j] = 1;
                 }
             }
+
 //            j = random.nextInt(chrom_size);
 //            oldPop[i].chrom[j] = 1;
 
@@ -265,7 +257,6 @@ public class GA {
         int mate1,mate2;
 
 
-
         for (int i=1; i < pop_size; i = i+2){
 
             mate1 = selection();
@@ -311,10 +302,6 @@ public class GA {
         while (gen < generation_num){
             ++gen;
 
-            if (gen % 3 ==0 ) {
-                graph.shuffleUseradjVertice(graph.userAdjVertices);
-            }
-
             generation(gen);
             statistics(newPop, gen);
 
@@ -332,7 +319,7 @@ public class GA {
 
     public class Population{
         // 基因组
-        int chrom[];
+        public int chrom[];
 
         // 花费
         int cost;
