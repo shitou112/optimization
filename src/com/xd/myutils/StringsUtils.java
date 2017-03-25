@@ -6,6 +6,7 @@ import com.xd.graph.NetworkVertex;
 import com.xd.graph.UserVertex;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -29,9 +30,10 @@ public class StringsUtils {
         int lineNum = 0;
 
         Graph graph = new Graph();
-        List<UserVertex> userVextexList = new ArrayList<UserVertex>();
-        List<NetworkVertex> networkVertexList = new ArrayList<NetworkVertex>();
-        List<NetworkVertex> userAdjVertices = new LinkedList<NetworkVertex>();
+        List<UserVertex> userVextexList = new ArrayList<>();
+        List<NetworkVertex> networkVertexList = new ArrayList<>();
+        List<NetworkVertex> userAdjVertices = new ArrayList<>();
+        HashMap<Integer, NetworkVertex> kingNetworks = new HashMap<>();
         List<Edge> edgeList = new ArrayList<Edge>();
 
 
@@ -90,6 +92,7 @@ public class StringsUtils {
 
             networkVertexList.get(neighborId).userDatas = userDatas;
             userAdjVertices.add(networkVertexList.get(neighborId));
+            kingNetworks.put(networkVertexList.get(neighborId).id,networkVertexList.get(neighborId));
 
             //为网络节点添加相邻的用户节点id号
             networkVertexList.get(neighborId).neighborId = userId;
@@ -98,6 +101,7 @@ public class StringsUtils {
         }
         graph.setUserVertexs(userVextexList);
         graph.userAdjVertices = userAdjVertices;
+        graph.kingNetworks = kingNetworks;
 
 
         return graph;

@@ -105,18 +105,20 @@ public class PQDijkstra {
             edgeHashMap = hashMaps[edgeValue.start];
             if (edgeHashMap != null && flag.get(edgeValue.start) == null){
                 for (Integer id: edgeHashMap.keySet()){
-                    if (flag.get(id) == null) {
-                        edge = edgeHashMap.get(id);
-                        if (edge.weight > 0) {
-                            int value = uap.unitCost[edgeValue.start] + edge.money;
-                            if (value < uap.unitCost[id]) {
-                                uap.unitCost[id] = value;
-                                uap.prePath[id] = edgeValue.start;
-                                uap.minWeight[id] = uap.minWeight[edgeValue.start] < edge.weight ? uap.minWeight[edgeValue.start] : edge.weight;
-                            }
+
+                    edge = edgeHashMap.get(id);
+                    if (edge.weight > 0) {
+                        int value = uap.unitCost[edgeValue.start] + edge.money;
+                        if (value < uap.unitCost[id]) {
+                            uap.unitCost[id] = value;
+                            uap.prePath[id] = edgeValue.start;
+                            uap.minWeight[id] = uap.minWeight[edgeValue.start] < edge.weight ? uap.minWeight[edgeValue.start] : edge.weight;
+                        }
+                        if (flag.get(id) == null) {
                             pq.add(new EdgeValue(id, edge.weight, value));
                         }
                     }
+
 
                 }
                 flag.put(edgeValue.start,true);
@@ -128,12 +130,12 @@ public class PQDijkstra {
 
 
     private int sumcost(List<NetworkVertex> userAdjNetworks, HashMap<Integer, Boolean> serverMaps, HashMap<Integer, UserAdjNetworksPath> userAdjNetworksPathMaps){
-        for (Integer id: userAdjNetworksPathMaps.keySet()){
-            System.out.println(id);
-            UserAdjNetworksPath us = userAdjNetworksPathMaps.get(id);
-            System.out.println(us);
-        }
-        System.out.println("=====");
+//        for (Integer id: userAdjNetworksPathMaps.keySet()){
+//            System.out.println(id);
+//            UserAdjNetworksPath us = userAdjNetworksPathMaps.get(id);
+//            System.out.println(us);
+//        }
+//        System.out.println("=====");
 
         UserAdjNetworksPath userAdjNetworksPath;
         int sumCost = 0, maxCost, minCost, minId = 101, userneeddata, oneCost;
@@ -147,7 +149,7 @@ public class PQDijkstra {
             useData = new HashMap<>();
             oneCost = 0;
 
-            System.out.print(networkVertex.id+" ");
+//            System.out.print(networkVertex.id+" ");
 
             while (userneeddata > 0) {
                 minId = 101;
@@ -167,7 +169,7 @@ public class PQDijkstra {
                 }
 
                 if (minId != 101) {
-                    System.out.print(minId+" ");
+//                    System.out.print(minId+" ");
                     if (userneeddata < userAdjNetworksPath.minWeight[minId]) {
                         oneCost += userneeddata * userAdjNetworksPath.unitCost[minId];
                         useData.put(minId, userneeddata);
@@ -181,9 +183,9 @@ public class PQDijkstra {
                         int minValue = Integer.MAX_VALUE, recordId=-1;
                         for (Integer id: graph.table[minId].keySet()){
                             if (id != networkVertex.id){
-                                if(userAdjNetworksPath.unitCost[id]+graph.table[minId].get(id).money < minValue){
+                                if(userAdjNetworksPath.unitCost[id]*graph.table[minId].get(id).money < minValue){
                                     recordId = id;
-                                    minValue = userAdjNetworksPath.unitCost[id]+graph.table[minId].get(id).money;
+                                    minValue = (int) (userAdjNetworksPath.unitCost[id]*graph.table[minId].get(id).money * 1.3);
                                 }
                             }
                         }
@@ -201,7 +203,7 @@ public class PQDijkstra {
 
             if (minId != 101) {
 
-                System.out.print(oneCost);
+//                System.out.print(oneCost);
 
                 vertexWeight[minId] -= userneeddata;
                 sumCost += oneCost;
@@ -211,7 +213,7 @@ public class PQDijkstra {
                 sumCost += graph.serverValue;
             }
 
-            System.out.println();
+//            System.out.println();
 
         }
         sumCost += graph.serverValue*graph.serverIds.size();

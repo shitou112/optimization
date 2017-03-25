@@ -5,16 +5,13 @@ import com.xd.graph.Edge;
 import com.xd.graph.Graph;
 import com.xd.graph.NetworkVertex;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 /**
  * @author Qian Shaofeng
  * @created on 2017/3/11.
  */
-public class GA {
+public class MyGA {
 
 
     //时间
@@ -23,9 +20,6 @@ public class GA {
 
     // 种群的规模
     private int pop_size;
-
-    //变异概率
-    double pm0 = 0.005,pm1 = 0.01, pm2 = 0.05;
 
     // 交叉概率
     private double pro_cross;
@@ -51,7 +45,7 @@ public class GA {
 
     private Random random;
 
-    public Population[] oldPop, newPop;
+    public List<Population> oldPop, newPop;
 
     private Graph graph;
 
@@ -68,7 +62,7 @@ public class GA {
     private int maxServerNum;
 
 
-    public GA(int pop_size, int chrom_size, int generation_num, GraphProcess graphProcess){
+    public MyGA(int pop_size, int chrom_size, int generation_num, GraphProcess graphProcess){
         this.pop_size = pop_size;
         this.chrom_size = chrom_size;
         this.generation_num = generation_num;
@@ -134,7 +128,7 @@ public class GA {
     }
 
 
-    public void statistics(Population[] pop, int gen){
+    public void statistics(List<Population> pop, int gen){
         double tmpFitness;
         double sumFitness1=0;
 
@@ -143,7 +137,7 @@ public class GA {
         minFitness = Double.MAX_VALUE;
 
         for (int i=0; i < pop_size; ++i){
-            tmpFitness = pop[i].fitness;
+            tmpFitness = pop.get(i).fitness;
 
             if (tmpFitness > maxFitness){
                 maxFitness = tmpFitness;
@@ -161,8 +155,8 @@ public class GA {
 
         for (int i=0; i < pop_size; ++i){
 //            sumFitness += 1- pop[i].fitness /(maxFitness + minFitness);
-            sumFitness += (maxFitness - pop[i].fitness) / maxFitness - minFitness;
-            sumFitness1 += pop[i].fitness;
+            sumFitness += (maxFitness - pop.get(i).fitness) / maxFitness - minFitness;
+            sumFitness1 += pop.get(i).fitness;
 
         }
 
@@ -185,7 +179,7 @@ public class GA {
         }
 
         //自适应变异率
-
+        double pm0 = 0.005,pm1 = 0.01, pm2 = 0.1;
         if (minFitness/avgFitness > para1 && minFitness / maxFitness >= pm1 / pm2){
             pro_mutate = pm2;
         }
@@ -201,25 +195,25 @@ public class GA {
 
     void initPop(){
         int i,j=0;
-        oldPop = new Population[pop_size];
-        newPop = new Population[pop_size];
+        oldPop = new ArrayList<>(pop_size);
+        newPop = new ArrayList<>(pop_size);
 
         Population population1,population2 ;
         for (i=0; i < pop_size; ++i){
             population1 = new Population(chrom_size);
             population2 = new Population(chrom_size);
-            oldPop[i] = population1;
-            newPop[i] = population2;
+            oldPop.add(population1);
+            newPop.add(population2);
 
             for (j=0; j < chrom_size; ++j) {
                 if (excise() <= 0.3) {
-                    oldPop[i].chrom[j] = 1;
+                    oldPop.get(i).chrom[j] = 1;
                 }
             }
 
-            oldPop[i].maxServerNum++;
+            oldPop.get(i).maxServerNum++;
 
-            calFit(oldPop[i], 0);
+            calFit(oldPop.get(i), 0);
 
 
         }
@@ -231,7 +225,39 @@ public class GA {
         return pp;
     }
 
-    int selection(){
+    void selection(){
+        Collections.sort(oldPop);
+
+        int i;
+        for (i=0; i < (int)(pop_size*0.1); ++i){
+            for (int j=0; j < chrom_size; ++j){
+                newPop.get(i).chrom[j] = oldPop.get(i).chrom[j];
+            }
+            newPop.get(i).fitness = oldPop.get(i).fitness;
+            newPop.get(i).cost = oldPop.get(i).cost;
+        }
+        int loc;
+        for (; i < pop_size; ++i){
+            loc = wheel();
+            for (int j=0; j < chrom_size; ++j){
+                newPop.get(i).chrom[j] = oldPop.get(loc).chrom[j];
+            }
+            newPop.get(i).fitness = oldPop.get(loc).fitness;
+            newPop.get(i).cost = oldPop.get(loc).cost;
+        }
+
+        Collections.shuffle(newPop);
+
+        for (int j=0; j < chrom_size; ++j){
+            newPop.get(0).chrom[j] = oldPop.get(0).chrom[j];
+        }
+        newPop.get(0).cost = oldPop.get(0).cost;
+        newPop.get(0).fitness = oldPop.get(0).fitness;
+
+
+    }
+
+    int wheel(){
         double wheelPos, randNumber, partsum = 0;
         int i = 0;
 
@@ -240,8 +266,8 @@ public class GA {
         wheelPos = randNumber*sumFitness;
         do {
 
-//            partsum += ( 1 - oldPop[i].fitness / (minFitness + maxFitness));
-            partsum += (maxFitness - oldPop[i].fitness) / (maxFitness - minFitness);
+//            partsum += ( 1 - oldPop.get(i).fitness / (minFitness + maxFitness));
+            partsum += (maxFitness - oldPop.get(i).fitness) / (maxFitness - minFitness);
             ++i;
 
         }while((partsum < wheelPos) && i < pop_size);
@@ -250,8 +276,8 @@ public class GA {
 
 
 
-    boolean crossOver(int[] parent1, int[] parent2, int chr1, int chr2){
-        int j;
+    boolean crossOver(Population first, Population second){
+        int j, tmp;
         int crossPos1, crossPos2;
         if (excise() <= pro_cross){
             crossPos1 = random.nextInt(chrom_size);
@@ -264,40 +290,12 @@ public class GA {
                 crossPos2 = temp;
             }
 
-            for (j = 0; j <= crossPos1; ++j){
-                newPop[chr1].chrom[j] = parent1[j];
-                newPop[chr2].chrom[j] = parent2[j];
-            }
-
-            for (; j < crossPos2; ++j){
-                newPop[chr1].chrom[j] = parent2[j];
-                newPop[chr2].chrom[j] = parent1[j];
-            }
-            for (; j < chrom_size; ++j){
-                newPop[chr1].chrom[j] = parent1[j];
-                newPop[chr2].chrom[j] = parent2[j];
-            }
-            return true;
-        }
-        return false;
-
-    }
-
-    boolean oneCrossOver(int[] parent1, int[] parent2, int chr1, int chr2){
-        int j;
-        int crossPos1, crossPos2;
-        if (excise() <= pro_cross){
-            crossPos1 = random.nextInt(chrom_size);
 
 
-            for (j = 0; j <= crossPos1; ++j){
-                newPop[chr1].chrom[j] = parent1[j];
-                newPop[chr2].chrom[j] = parent2[j];
-            }
-
-            for (; j < chrom_size; ++j){
-                newPop[chr1].chrom[j] = parent2[j];
-                newPop[chr2].chrom[j] = parent1[j];
+            for (j=crossPos1; j < crossPos2; ++j){
+                tmp = first.chrom[j];
+                first.chrom[j] = second.chrom[j];
+                second.chrom[j] = tmp;
             }
 
             return true;
@@ -305,6 +303,8 @@ public class GA {
         return false;
 
     }
+
+
 
     int mutation( int alleles){
 
@@ -320,7 +320,7 @@ public class GA {
 
         for (int i=0; i < chrom_size; ++i) {
             if (excise() <= pro_mutate) {
-                newPop.chrom[i] = 1 - oldPop[random.nextInt(pop_size)].chrom[i];
+                newPop.chrom[i] = 1 - oldPop.get(random.nextInt(pop_size)).chrom[i];
             }
         }
 
@@ -335,10 +335,10 @@ public class GA {
         if (excise() > pro){
 
             for (int i=0; i < chrom_size; ++i){
-                pop.chrom[i] = oldPop[loc].chrom[i];
+                pop.chrom[i] = oldPop.get(loc).chrom[i];
             }
-            pop.cost = oldPop[loc].cost;
-            pop.fitness = oldPop[loc].fitness;
+            pop.cost = oldPop.get(loc).cost;
+            pop.fitness = oldPop.get(loc).fitness;
 
         }
 
@@ -350,23 +350,22 @@ public class GA {
     void generation(int gen){
         int mate1,mate2;
 
+        selection();
+
 
         for (int i=1; i < pop_size; i = i+2){
 
-            mate1 = selection();
-            mate2 = selection();
-
-            crossOver(oldPop[mate1].chrom, oldPop[mate2].chrom, i, i+1);
+            crossOver(newPop.get(i), newPop.get(i+1));
 
 
-            twoBinaryMutation(newPop[i]);
-            twoBinaryMutation(newPop[i+1]);
+            twoBinaryMutation(newPop.get(i));
+            twoBinaryMutation(newPop.get(i+1));
 
-            calFit(newPop[i], gen);
-            calFit(newPop[i+1], gen);
+            calFit(newPop.get(i), gen);
+            calFit(newPop.get(i+1), gen);
 
-//            if (newPop[i].fitness > oldPop[mate1].fitness){
-//                annealing(newPop[i].fitness - oldPop[mate1].fitness, newPop[i], mate1);
+//            if (newPop.get(i).fitness > oldPop[mate1].fitness){
+//                annealing(newPop.get(i).fitness - oldPop[mate1].fitness, newPop.get(i), mate1);
 //            }
 //            if (newPop[i+1].fitness > oldPop[mate2].fitness){
 //                annealing(newPop[i+1].fitness - oldPop[mate2].fitness, newPop[i+1], mate2);
@@ -375,11 +374,7 @@ public class GA {
         }
 
 
-        for (int j=0; j < chrom_size; ++j){
-            newPop[0].chrom[j] = oldPop[minPop].chrom[j];
-        }
-        newPop[0].cost = oldPop[minPop].cost;
-        newPop[0].fitness = oldPop[minPop].fitness;
+
 
     }
 
@@ -419,17 +414,17 @@ public class GA {
 
             for (int i=0; i < pop_size; ++i){
                 for (int j=0; j < chrom_size; ++j){
-                    oldPop[i].chrom[j] = newPop[i].chrom[j];
+                    oldPop.get(i).chrom[j] = newPop.get(i).chrom[j];
                 }
-                oldPop[i].cost = newPop[i].cost;
-                oldPop[i].fitness = newPop[i].fitness;
+                oldPop.get(i).cost = newPop.get(i).cost;
+                oldPop.get(i).fitness = newPop.get(i).fitness;
             }
         }
 
 
     }
 
-    public class Population{
+    public class Population implements Comparable<Population>{
         // 基因组
         public int chrom[];
 
@@ -456,6 +451,16 @@ public class GA {
             }
             str += cost+" fit "+ fitness;
             return str;
+        }
+
+        @Override
+        public int compareTo(Population o) {
+            if (this.fitness < o.fitness)
+                return -1;
+            else if(this.fitness == o.fitness)
+                return 0;
+            else
+                return 1;
         }
     }
 

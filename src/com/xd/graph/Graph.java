@@ -48,12 +48,14 @@ public class Graph{
     /**
      * 部署服务器的节点id
      */
-    public HashMap<Integer, Boolean> serverIds = new HashMap<Integer, Boolean>();
+    public HashMap<Integer, Boolean> serverIds = new HashMap<>();
 
     /**
      * 与用户节点相邻的网络节点
      */
+    public HashMap<Integer, NetworkVertex> kingNetworks;
     public List<NetworkVertex> userAdjVertices;
+
 
     /**
      * 网络拓扑图中存放边的集合
@@ -115,6 +117,8 @@ public class Graph{
     public void shuffleUseradjVertice(List list){
         Collections.shuffle(list);
     }
+
+
 
 
 

@@ -150,18 +150,20 @@ public class PQDijkstraImprove {
             edgeHashMap = hashMaps[edgeValue.start];
             if (edgeHashMap != null){
                 for (Integer id: edgeHashMap.keySet()){
-                    if (flag.get(id) == null) {
 
-                        edge = edgeHashMap.get(id);
-                        int value = disto[edgeValue.start] + edge.money;
-                        if (edge.weight >0 && value < disto[id]) {
+                    edge = edgeHashMap.get(id);
+                    int value = disto[edgeValue.start] + edge.money;
+                    if (edge.weight >0 && value < disto[id]) {
 
-                            disto[id] = value;
-                            prepath[id] = edgeValue.start;
-                            minWeight[id] = minWeight[edgeValue.start] < edge.weight?minWeight[edgeValue.start]:edge.weight;
+                        disto[id] = value;
+                        prepath[id] = edgeValue.start;
+                        minWeight[id] = minWeight[edgeValue.start] < edge.weight?minWeight[edgeValue.start]:edge.weight;
+                        if (flag.get(id) == null) {
+                            pq.add(new EdgeValue(id, value));
                         }
-                        pq.add(new EdgeValue(id, value));
                     }
+
+
                 }
             }
 
@@ -210,6 +212,11 @@ public class PQDijkstraImprove {
         for (i=minId; prepath[i] != -1; i=prepath[i]){
             edge = hashMaps[prepath[i]].get(i);
             edge.weight -=myweight;
+
+
+            //考虑单向边
+            hashMaps[i].get(prepath[i]).weight -= myweight;
+
             oneCost += myweight*edge.money;
             list.add(i);
         }
