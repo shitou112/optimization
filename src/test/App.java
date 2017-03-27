@@ -157,7 +157,7 @@ public class App {
 
        GraphProcess graphProcess = new GraphProcess(graph);
         graphProcess.updateGraph();
-        GA ga = new GA(31, graph.aliveNetVerticesNum, 500, graphProcess);
+        GA ga = new GA(31, graph.aliveNetVerticesNum, 500,graphProcess);
         for (int i=0; i < graph.table.length; ++i){
             System.out.println(i);
             if (graph.table[i] != null) {
@@ -175,7 +175,7 @@ public class App {
         graph.serverIds.put(22, true);
         graph.serverIds.put(3, true);
 
-        ga.addSuperSource(graph.serverIds);
+//        ga.addSuperSource(graph.serverIds);
 //        graph.shuffleUseradjVertice(graph.userAdjVertices);
         PathCost pqDijkstra = new PathCost(graph);
 

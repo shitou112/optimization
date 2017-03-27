@@ -13,6 +13,7 @@ public class PathCost {
     private Graph graph;
     private int[] disto;
     private int[] prepath;
+    private int[] vertexCost;
 
 
 
@@ -23,7 +24,7 @@ public class PathCost {
         this.graph = graph;
         prepath = new int[graph.networkVertexnum+2];
         disto = new int[graph.networkVertexnum+2];
-
+        vertexCost = new int[graph.networkVertexnum+2];
     }
 
     private void init(){
@@ -48,6 +49,7 @@ public class PathCost {
             //王权节点到汇点边权重不为0，则表明不能满足需求
             if (hashMaps[graph.kingNetworks.get(id).id].get(graph.networkVertexnum).weight != 0){
 
+           //     sumCost -= vertexCost[id] ;
                 sumCost += graph.serverValue;
             }
         }
@@ -66,8 +68,8 @@ public class PathCost {
 
         disto[s] = 0;
 
-        HashMap<Integer,Boolean> flag = new HashMap<Integer, Boolean>();
-        pq = new PriorityQueue<EdgeValue>();
+        HashMap<Integer,Boolean> flag = new HashMap<>();
+        pq = new PriorityQueue<>();
 
 
         pq.add(new EdgeValue(s, Integer.MAX_VALUE, 0));
@@ -77,20 +79,11 @@ public class PathCost {
         HashMap<Integer, Edge> edgeHashMap = null;
         while (!pq.isEmpty()){
 
-
             edgeValue = pq.poll();
-
-
 
             if (edgeValue.start == t) {
                 return true;
             }
-
-//            if (disto[edgeValue.start]*minWeight[edgeValue.start] > graph.serverValue) {
-////                System.out.println(s+"----"+edgeValue.start+"---"+disto[edgeValue.start]*minWeight[edgeValue.start]);
-//                break;
-//            }
-
 
 
             edgeHashMap = hashMaps[edgeValue.start];
@@ -103,7 +96,6 @@ public class PathCost {
                         if (value < disto[id]) {
                             disto[id] = value;
                             prepath[id] = edgeValue.start;
-
                             if (flag.get(id) == null) {
                                 pq.add(new EdgeValue(id, edge.weight, disto[id]));
                             }
@@ -153,6 +145,7 @@ public class PathCost {
 
             mincost += onecost;
             maxflow += minflow;
+            vertexCost[prepath[t]] += onecost;
 
             if (maxflow == graph.userNeedData){
 //                System.out.println(maxflow);

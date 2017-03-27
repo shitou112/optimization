@@ -4,7 +4,9 @@ import com.xd.graph.Edge;
 import com.xd.graph.Graph;
 import com.xd.graph.NetworkVertex;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * @author Qian Shaofeng
@@ -13,11 +15,12 @@ import java.util.*;
 public class GraphProcess {
     private Graph graph;
     private List datalist;
+    private int sumData;
 
     private int[] adjKingVertexData;
 
     //A是用户需求占比， B是王权节点占比， C是其他流量占比
-    public double A = 1.3, B = 0.8, C=0.4;
+    public double A = 1.4, B = 0.8, C=0.4;
 
 
     public GraphProcess(Graph graph){
@@ -36,14 +39,16 @@ public class GraphProcess {
 
         dataStatistic();
 
+        computeAliveVertices();
+
         dataSort();
 
         // 流量统计
 
 //        dataSortUserAdjVertices();
-        computeAliveVertices();
 //
 //        int i=0;
+//
 //        for (NetworkVertex networkVertex: graph.getNetworkVertices()){
 //            System.out.println((i++)+"   "+networkVertex);
 //        }
@@ -53,18 +58,20 @@ public class GraphProcess {
     }
 
     public void computeAliveVertices(){
-        if (50 <= graph.networkVertexnum && graph.networkVertexnum  < 100 ){
-            int tmp = (int)Math.round(0.7 * graph.networkVertexnum);
+        if (graph.networkVertexnum  < 100 ){
+            int tmp = (int)Math.round(0.9 * graph.networkVertexnum);
             if (graph.aliveNetVerticesNum > tmp){
                 graph.aliveNetVerticesNum = tmp;
             }
-        }else if (100 <= graph.networkVertexnum && graph.networkVertexnum  < 200){
+        }else if (graph.networkVertexnum  < 200){
+            A = 1.2; B = 0.8; C=0.4;
             int tmp = (int)Math.round(0.7 * graph.networkVertexnum);
             if (graph.aliveNetVerticesNum > tmp){
                 graph.aliveNetVerticesNum = tmp;
             }
 
-        }else if (200 <= graph.networkVertexnum && graph.networkVertexnum  < 500){
+        }else if (graph.networkVertexnum  < 500){
+            A = 1.3; B = 0.8; C=0.4;
             int tmp = (int)Math.round(0.6 * graph.networkVertexnum);
             if (graph.aliveNetVerticesNum > tmp){
                 graph.aliveNetVerticesNum = tmp;
@@ -72,7 +79,8 @@ public class GraphProcess {
 
         }
         else if (500 <= graph.networkVertexnum){
-            int tmp = (int)Math.round(0.3*graph.networkVertexnum);
+            A = 1.4; B = 0.8; C=0.4;
+            int tmp = (int)Math.round(0.55*graph.networkVertexnum);
             if (graph.aliveNetVerticesNum > tmp){
                 graph.aliveNetVerticesNum = tmp;
             }
@@ -86,7 +94,8 @@ public class GraphProcess {
         NetworkVertex networkVertex = null;
         for (int i=0; i < graph.userAdjVertices.size(); ++i){
             networkVertex = graph.userAdjVertices.get(i);
-            networkVertex.userScore = 100*1.0/graph.table[i].size()*0.7 +  100.0/networkVertex.userDatas*30;
+            networkVertex.userScore =  graph.userNeedData / networkVertex.userDatas;
+//               1000*1.0/graph.table[i].size()*0.7 +
         }
     }
 
@@ -103,8 +112,6 @@ public class GraphProcess {
                 tmp = -1;
             }
 
-//            System.out.println(adjKingVertexData[i]);
-//            System.out.println(i+": "+A*(networkVertex.userDatas)+"---"+B*(networkVertex.data)+"---"+(B-C)*adjKingVertexData[i]);
             networkVertex.serverScore = A*(networkVertex.userDatas) + C*(networkVertex.data) + (B-C)*adjKingVertexData[i] + 100*tmp;
         }
     }
@@ -131,6 +138,7 @@ public class GraphProcess {
 
             networkVertexList.get(edge.v).data += edge.weight;
             networkVertexList.get(edge.w).data += edge.weight;
+
         }
 
     }
@@ -162,6 +170,7 @@ public class GraphProcess {
 
 
 
+
     /**
      * 对网络拓扑图中各个节点的流量进行排序
      *
@@ -169,6 +178,11 @@ public class GraphProcess {
     private void dataSort(){
         computeServerScore();
         Collections.sort(graph.getNetworkVertices());
+    }
+
+    private void dataSortUserAdjVertices(){
+        computeUserScore();
+        Collections.sort(graph.userAdjVertices);
     }
 
     /**

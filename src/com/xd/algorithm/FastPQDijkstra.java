@@ -28,8 +28,8 @@ public class FastPQDijkstra {
     //所有用户节点寻找服务器的花费
     private int sumcost;
 
-    private List<List> pathsList = new ArrayList<>();
-    private List<List> allPathList = new ArrayList<>();
+    private List<List> pathsList;
+    private List<List> allPathList;
     private PriorityQueue<EdgeValue> pq;
 
     public FastPQDijkstra(Graph graph){
@@ -57,6 +57,8 @@ public class FastPQDijkstra {
      */
     public int searchGraphPaths(List<NetworkVertex> userVertices, HashMap<Integer, Edge>[] hashMaps){
         sumcost = 0;
+        allPathList = new ArrayList<>();
+
         if (graph.serverIds.size() ==0 ){
             graph.serverIds.put(graph.userAdjVertices.get(0).id, true);
         }
@@ -126,8 +128,8 @@ public class FastPQDijkstra {
         disto[s] = 0;
         minWeight[s] = data;
 
-        HashMap<Integer,Boolean> flag = new HashMap<Integer, Boolean>();
-        pq = new PriorityQueue<EdgeValue>();
+        HashMap<Integer,Boolean> flag = new HashMap<>(graph.networkVertexnum+2);
+        pq = new PriorityQueue<>();
 
 
         pq.add(new EdgeValue(s, 0, 0));
@@ -153,20 +155,22 @@ public class FastPQDijkstra {
             edgeHashMap = hashMaps[edgeValue.start];
             if (edgeHashMap != null && flag.get(edgeValue.start) == null){
                 for (Integer id: edgeHashMap.keySet()){
+                    if (flag.get(id) == null) {
+                        edge = edgeHashMap.get(id);
+                        if (edge.weight > 0) {
+                            int value = disto[edgeValue.start] + edge.money;
+                            if (value < disto[id]) {
+                                disto[id] = value;
+                                prepath[id] = edgeValue.start;
+                                minWeight[id] = minWeight[edgeValue.start] < edge.weight ? minWeight[edgeValue.start] : edge.weight;
 
-                    edge = edgeHashMap.get(id);
-                    if (edge.weight > 0) {
-                        int value = disto[edgeValue.start] + edge.money;
-                        if (value < disto[id]) {
-                            disto[id] = value;
-                            prepath[id] = edgeValue.start;
-                            minWeight[id] = minWeight[edgeValue.start] < edge.weight ? minWeight[edgeValue.start] : edge.weight;
-                            if (flag.get(id) == null) {
                                 pq.add(new EdgeValue(id, edge.weight, disto[id]));
-                            }
-                        }
 
+                            }
+
+                        }
                     }
+
 
 
                 }
@@ -206,8 +210,6 @@ public class FastPQDijkstra {
         for (i=serverId; prepath[i] != -1; i=prepath[i]){
             edge = hashMaps[prepath[i]].get(i);
 
-//            //添加负向流
-//            hashMaps[i].get(prepath[i]).weight -= myweight;
 
             edge.weight -=myweight;
             oneCost += myweight*edge.money;

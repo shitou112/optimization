@@ -7,7 +7,6 @@ import com.xd.graph.NetworkVertex;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 /**
@@ -25,7 +24,9 @@ public class GA {
     private int pop_size;
 
     //变异概率
-    double pm0 = 0.005,pm1 = 0.01, pm2 = 0.05;
+    public double pm0 = 0.005,pm1 = 0.01, pm2 = 0.05;
+
+    public double pro_init_server = 0.6;
 
     // 交叉概率
     private double pro_cross;
@@ -67,6 +68,8 @@ public class GA {
 
     private int maxServerNum;
 
+    private FastPQDijkstra pqDijkstra;
+
 
     public GA(int pop_size, int chrom_size, int generation_num, GraphProcess graphProcess){
         this.pop_size = pop_size;
@@ -75,8 +78,8 @@ public class GA {
         this.graphProcess = graphProcess;
         this.graph = graphProcess.getGraph();
         this.maxServerNum = graphProcess.getGraph().getUserVertexs().size();
+        this.pqDijkstra = new FastPQDijkstra(graph);
     }
-
 
 
     public void addSuperSource(HashMap<Integer, Boolean> hashMap){
@@ -85,8 +88,10 @@ public class GA {
         }
     }
 
+
     public int calFit(Population pop, int gen){
-        graphProcess.addEdgesOfVertex();
+
+
         graph.serverIds.clear();
         NetworkVertex networkVertex = null;
         for (int i=0; i < pop.chrom.length; ++i){
@@ -94,29 +99,39 @@ public class GA {
                 networkVertex = graph.getNetworkVertices().get(i);
                 graph.serverIds.put(networkVertex.id, true);
             }
+
         }
 
+        int startServerSize = graph.serverIds.size() + 1;
 
         //使用dijkstra算法求得最小路径
-        FastPQDijkstra pqDijkstra = new FastPQDijkstra(graph);
+        graphProcess.addEdgesOfVertex();
         int sum = pqDijkstra.searchGraphPaths(graph.userAdjVertices, graph.table);
 
+        //使用最小费用最大流
 //        graphProcess.addEdges();
 //        addSuperSource(graph.serverIds);
 //        PathCost pqDijkstra = new PathCost(graph);
 //        int sum = pqDijkstra.minPathCost(graph.table);
+//        System.out.println(sum);
+
+        int endServerSize = graph.serverIds.size() + 1;
+
+        usageRate = endServerSize * 1.0 / startServerSize;
 
         pathList = pqDijkstra.getAllPathList();
 
         pop.cost = sum;
 
-        pop.fitness = pop.cost * 1.0;
+        pop.fitness = pop.cost * usageRate;
+//        pop.fitness = pop.cost * 1.0;
 
         compareCost(sum, pathList, gen);
+
         return sum;
     }
 
-    public void compareCost(int cost, List pathList, int gen){
+    public boolean compareCost(int cost, List pathList, int gen){
         if (cost < bestCost){
             bestCost = cost;
             bestList = pathList;
@@ -126,7 +141,9 @@ public class GA {
             for (Integer id:graph.serverIds.keySet()){
                 bestServer.put(id, true);
             }
+            return true;
         }
+        return false;
     }
 
     public double getUsageRate(){
@@ -156,8 +173,10 @@ public class GA {
                 minPop = i;
             }
 
+//            System.out.println(oldPop[i]);
         }
 
+//        System.out.println("======");
 
         for (int i=0; i < pop_size; ++i){
 //            sumFitness += 1- pop[i].fitness /(maxFitness + minFitness);
@@ -169,32 +188,34 @@ public class GA {
         avgFitness = sumFitness1 / pop_size;
 
 
-        double pc0 = 0.3, pc1 = 0.6, pc2 = 0.9, para1 = 0.78, para2 = 0.0005;
+        double pc0 = 0.4, pc1 = 0.6, pc2 = 0.9, para1 = 0.78, para2 = 0.0005;
         // 自适应交叉率
         if (minFitness/avgFitness > para1 && minFitness / maxFitness >= pc1 / pc2){
             pro_cross = pc0;
-//            System.out.println("1");
         }
         else if (minFitness / avgFitness > para1 && minFitness / maxFitness > para2 && minFitness / maxFitness < pc1 / pc2){
             pro_cross = pc2 - (pc2 - pc1) / (1 - minFitness/maxFitness);
-//            System.out.println("2");
         }
         else {
             pro_cross = pc2;
-//            System.out.println("3");
         }
 
         //自适应变异率
 
         if (minFitness/avgFitness > para1 && minFitness / maxFitness >= pm1 / pm2){
             pro_mutate = pm2;
+//            System.out.println("2");
         }
         else if (minFitness / avgFitness > para1 && minFitness / maxFitness > para2 && minFitness / maxFitness < pm1 / pm2){
             pro_mutate = pm2 - (pm2 - pm1) / (1 - minFitness/maxFitness);
+//            System.out.println("1");
         }
         else {
             pro_mutate = pm0;
+//            System.out.println("0");
         }
+
+
 
     }
 
@@ -212,7 +233,7 @@ public class GA {
             newPop[i] = population2;
 
             for (j=0; j < chrom_size; ++j) {
-                if (excise() <= 0.3) {
+                if (excise() <= pro_init_server) {
                     oldPop[i].chrom[j] = 1;
                 }
             }
@@ -331,7 +352,6 @@ public class GA {
 
         double pro = Math.pow(Math.E, -delta / T);
 
-
         if (excise() > pro){
 
             for (int i=0; i < chrom_size; ++i){
@@ -340,9 +360,10 @@ public class GA {
             pop.cost = oldPop[loc].cost;
             pop.fitness = oldPop[loc].fitness;
 
+
         }
 
-        T = T * 0.99;
+
     }
 
 
@@ -358,6 +379,10 @@ public class GA {
 
             crossOver(oldPop[mate1].chrom, oldPop[mate2].chrom, i, i+1);
 
+//            for (int j=0; j < chrom_size; ++j){
+//                mutation(newPop[i].chrom[j]);
+//                mutation(newPop[i+1].chrom[j]);
+//            }
 
             twoBinaryMutation(newPop[i]);
             twoBinaryMutation(newPop[i+1]);
@@ -383,6 +408,37 @@ public class GA {
 
     }
 
+    void initParamter(){
+        if (graph.networkVertexnum < 250){
+            this.pm0 = 0.005;
+            this.pm1 = 0.007;
+            this.pm2 = 0.01;
+
+            this.T = chrom_size * pop_size ;
+
+            this.pro_init_server = 0.4;
+            System.out.println(this.pro_init_server);
+        }
+        else if (graph.networkVertexnum < 600){
+            this.pm0 = 0.003;
+            this.pm1 = 0.005;
+            this.pm2 = 0.005;
+
+            this.T = chrom_size * pop_size ;
+
+            this.pro_init_server = 0.6;
+            System.out.println(this.pro_init_server);
+        }
+        else {
+            this.pm0 = 0.004;
+            this.pm1 = 0.005;
+            this.pm2 = 0.007;
+
+            this.pro_init_server = (graph.userVertexnums * 1.1 / 2) / graph.aliveNetVerticesNum;
+            System.out.println(this.pro_init_server);
+        }
+    }
+
     public void startGA(){
 
 
@@ -390,28 +446,34 @@ public class GA {
         random = new Random(System.currentTimeMillis());
         int gen = 0;
 
+
+        initParamter();
         initPop();
         statistics(oldPop, gen);
         double d = maxFitness - minFitness;
 
-        T = d * chrom_size;
+        T = d * T;
 
         while (gen < generation_num){
+            T = T * 0.97;
+
+
             ++gen;
 
             end = System.currentTimeMillis();
 
+
+
 //            System.out.println(end - start);
-            if (end - start > 80*1000){
+            if (end - start > 84*1000){
                 System.out.println(end - start);
                 System.out.println(gen);
                 break;
             }
 
-            if (gen %3 == 0){
+            if (gen % 3 == 0){
                 graph.shuffleUseradjVertice(graph.userAdjVertices);
             }
-
 
 
             generation(gen);
@@ -424,6 +486,7 @@ public class GA {
                 oldPop[i].cost = newPop[i].cost;
                 oldPop[i].fitness = newPop[i].fitness;
             }
+
         }
 
 
