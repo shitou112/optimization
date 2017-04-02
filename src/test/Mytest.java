@@ -22,7 +22,7 @@ public class Mytest {
 
     @Test
     public void test(){
-        System.out.println(Math.log(10));
+
     }
 
 }

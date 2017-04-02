@@ -5,9 +5,7 @@ import com.xd.graph.Edge;
 import com.xd.graph.Graph;
 import com.xd.graph.NetworkVertex;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * @author Qian Shaofeng
@@ -23,6 +21,8 @@ public class GA {
     // 种群的规模
     private int pop_size;
 
+    double pc0 = 0.4, pc1 = 0.6, pc2 = 0.9, para1 = 0.78, para2 = 0.0005;
+
     //变异概率
     public double pm0 = 0.005,pm1 = 0.01, pm2 = 0.05;
 
@@ -37,12 +37,17 @@ public class GA {
     //退火参数d
     private double T;
 
+    private double a = 0.97;
 
     // 染色体长度
     private int chrom_size;
 
     // 繁殖代数
     private int generation_num;
+
+    private int explore_num = 5;
+
+    private int max_explore_num;
 
 
     private double sumFitness, avgFitness, usageRate, minFitness = Double.MAX_VALUE, maxFitness = Double.MAX_VALUE;
@@ -67,6 +72,10 @@ public class GA {
     private int bestId;
 
     private int maxServerNum;
+
+    private int stagnateNum, maxStagnateNum;
+
+    private int precost;
 
     private FastPQDijkstra pqDijkstra;
 
@@ -133,6 +142,8 @@ public class GA {
 
     public boolean compareCost(int cost, List pathList, int gen){
         if (cost < bestCost){
+            System.out.println("cost: "+cost);
+            System.out.println(gen);
             bestCost = cost;
             bestList = pathList;
             bestId = gen;
@@ -188,7 +199,7 @@ public class GA {
         avgFitness = sumFitness1 / pop_size;
 
 
-        double pc0 = 0.4, pc1 = 0.6, pc2 = 0.9, para1 = 0.78, para2 = 0.0005;
+
         // 自适应交叉率
         if (minFitness/avgFitness > para1 && minFitness / maxFitness >= pc1 / pc2){
             pro_cross = pc0;
@@ -219,6 +230,24 @@ public class GA {
 
     }
 
+    void initOnePop(Population newpop, Population[] pop, int gen){
+        int j;
+        for (j=0; j < chrom_size - explore_num; ++j) {
+            if (excise() <= 0.3) {
+                newpop.chrom[j] = 1 - newpop.chrom[j];
+            }
+
+        }
+        for (; j < chrom_size; ++j){
+            if (excise() <= 0.4) {
+                newpop.chrom[j] = 1;
+            }
+        }
+        calFit(newpop, gen);
+
+        newpop.fitness = newpop.fitness > avgFitness ? avgFitness : newpop.fitness;
+    }
+
 
     void initPop(){
         int i,j=0;
@@ -226,7 +255,10 @@ public class GA {
         newPop = new Population[pop_size];
 
         Population population1,population2 ;
-        for (i=0; i < pop_size; ++i){
+
+
+
+        for (i=0 ; i < pop_size; ++i){
             population1 = new Population(chrom_size);
             population2 = new Population(chrom_size);
             oldPop[i] = population1;
@@ -336,8 +368,9 @@ public class GA {
 
     }
 
-    void twoBinaryMutation(Population newPop){
 
+
+    void twoBinaryMutation(Population newPop){
 
         for (int i=0; i < chrom_size; ++i) {
             if (excise() <= pro_mutate) {
@@ -362,11 +395,42 @@ public class GA {
 
 
         }
+//        System.out.println(pro);
 
 
     }
 
+    void exploreChrome(Population[] pop, Population[] oldPop){
 
+        if (chrom_size < max_explore_num) {
+            Population population, oldPopulation;
+            int temp = 0;
+            temp = (int) (chrom_size + explore_num);
+            if (temp > max_explore_num) {
+                temp = max_explore_num;
+            }
+
+            for (int i = 0; i < pop.length; ++i) {
+
+                population = new Population(temp);
+                oldPopulation = new Population(temp);
+
+                for (int j = 0; j < chrom_size; ++j) {
+                    population.chrom[j] = pop[i].chrom[j];
+                    oldPopulation.chrom[j] = oldPop[i].chrom[j];
+                }
+                population.cost = pop[i].cost;
+                population.fitness = pop[i].fitness;
+                pop[i] = population;
+
+                oldPopulation.cost = oldPop[i].cost;
+                oldPopulation.fitness = oldPop[i].fitness;
+                oldPop[i] = oldPopulation;
+            }
+
+            chrom_size = temp;
+        }
+    }
 
     void generation(int gen){
         int mate1,mate2;
@@ -390,12 +454,12 @@ public class GA {
             calFit(newPop[i], gen);
             calFit(newPop[i+1], gen);
 
-//            if (newPop[i].fitness > oldPop[mate1].fitness){
-//                annealing(newPop[i].fitness - oldPop[mate1].fitness, newPop[i], mate1);
-//            }
-//            if (newPop[i+1].fitness > oldPop[mate2].fitness){
-//                annealing(newPop[i+1].fitness - oldPop[mate2].fitness, newPop[i+1], mate2);
-//            }
+            if (newPop[i].fitness > oldPop[mate1].fitness){
+                annealing(newPop[i].fitness - oldPop[mate1].fitness, newPop[i], mate1);
+            }
+            if (newPop[i+1].fitness > oldPop[mate2].fitness){
+                annealing(newPop[i+1].fitness - oldPop[mate2].fitness, newPop[i+1], mate2);
+            }
 
         }
 
@@ -410,31 +474,53 @@ public class GA {
 
     void initParamter(){
         if (graph.networkVertexnum < 250){
+
+            max_explore_num = (int) (graph.networkVertexnum * 0.5);
+            explore_num = 10;
+            maxStagnateNum = 50;
+
             this.pm0 = 0.005;
             this.pm1 = 0.007;
-            this.pm2 = 0.01;
+            this.pm2 = 0.008;
 
-            this.T = chrom_size * pop_size ;
 
-            this.pro_init_server = 0.4;
+            this.T = chrom_size * pop_size;
+            this.a = 0.97;
+
+            this.pro_init_server = 0.65;
             System.out.println(this.pro_init_server);
         }
-        else if (graph.networkVertexnum < 600){
+        else if (graph.networkVertexnum < 500){
+
+            max_explore_num = (int) (graph.networkVertexnum * 0.5);
+            explore_num = 20;
+            maxStagnateNum = 40;
+
             this.pm0 = 0.003;
-            this.pm1 = 0.005;
-            this.pm2 = 0.005;
+            this.pm1 = 0.007;
+            this.pm2 = 0.008;
 
-            this.T = chrom_size * pop_size ;
+            this.T = chrom_size  * pop_size;
+            this.a = 0.97;
 
-            this.pro_init_server = 0.6;
+            this.pro_init_server = 0.65;
             System.out.println(this.pro_init_server);
         }
         else {
-            this.pm0 = 0.004;
-            this.pm1 = 0.005;
+
+            max_explore_num = (int) (graph.networkVertexnum * 0.35);
+            explore_num = 30;
+            maxStagnateNum = 6;
+
+            this.pm0 = 0.005;
+            this.pm1 = 0.006;
             this.pm2 = 0.007;
 
-            this.pro_init_server = (graph.userVertexnums * 1.1 / 2) / graph.aliveNetVerticesNum;
+            this.T = chrom_size * pop_size;
+            this.a = 0.97;
+
+//            this.pro_init_server = (graph.userVertexnums * 2.0 / 2) / graph.aliveNetVerticesNum;
+            this.pro_init_server = 0.72;
             System.out.println(this.pro_init_server);
         }
     }
@@ -454,30 +540,73 @@ public class GA {
 
         T = d * T;
 
-        while (gen < generation_num){
-            T = T * 0.97;
+        boolean flag = false;
 
+        while (gen < generation_num){
+
+            T = T * a;
 
             ++gen;
 
             end = System.currentTimeMillis();
 
-
-
 //            System.out.println(end - start);
-            if (end - start > 84*1000){
+            if (end - start > 86*1000){
+
                 System.out.println(end - start);
                 System.out.println(gen);
                 break;
             }
 
-            if (gen % 3 == 0){
+            if (gen % 2 == 0 && flag){
                 graph.shuffleUseradjVertice(graph.userAdjVertices);
             }
 
 
             generation(gen);
+
+
+//            if (flag){
+//                System.out.println("----+++++========");
+//                for (int j = 0; j < pop_size; ++j){
+//                    System.out.println(newPop[j]);
+//                }
+//                flag = false;
+//            }
+
+            if (precost == bestCost){
+                stagnateNum++;
+            }
+            else {
+                precost = bestCost;
+                stagnateNum = 0;
+            }
+
+
+            if (stagnateNum > maxStagnateNum && gen > 100){
+                maxStagnateNum += 10;
+                stagnateNum = 0;
+                Arrays.sort(newPop);
+
+                System.out.println("---bbbbbbbbbbbbbbbbbb---");
+                System.out.println("chromesize: "+chrom_size);
+                exploreChrome(newPop, oldPop);
+                for (int k=0; k < 10 ; ++k) {
+                    initOnePop(newPop[ pop_size - k -1], newPop, gen);
+                }
+
+                for (int j = 0; j < pop_size; ++j){
+                    System.out.println(newPop[j]);
+                }
+                flag = true;
+
+            }
+
+
             statistics(newPop, gen);
+
+
+
 
             for (int i=0; i < pop_size; ++i){
                 for (int j=0; j < chrom_size; ++j){
@@ -492,7 +621,7 @@ public class GA {
 
     }
 
-    public class Population{
+    public class Population implements Comparable{
         // 基因组
         public int chrom[];
 
@@ -519,6 +648,17 @@ public class GA {
             }
             str += cost+" fit "+ fitness;
             return str;
+        }
+
+        @Override
+        public int compareTo(Object o) {
+            Population population = (Population) o;
+            if (this.fitness < ((Population) o).fitness)
+                return -1;
+            else if (this.fitness == ((Population) o).fitness)
+                return 0;
+            else
+                return 1;
         }
     }
 

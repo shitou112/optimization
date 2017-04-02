@@ -146,7 +146,7 @@ public class FastPQDijkstra {
             }
 
 
-            if (disto[edgeValue.start]*minWeight[edgeValue.start] > graph.serverValue) {
+            if (disto[edgeValue.start] * data > graph.serverValue) {
 //                System.out.println(s+"----"+edgeValue.start+"---"+disto[edgeValue.start]*minWeight[edgeValue.start]);
                 break;
             }

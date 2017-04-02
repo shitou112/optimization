@@ -64,23 +64,29 @@ public class GraphProcess {
                 graph.aliveNetVerticesNum = tmp;
             }
         }else if (graph.networkVertexnum  < 200){
-            A = 1.2; B = 0.8; C=0.4;
-            int tmp = (int)Math.round(0.7 * graph.networkVertexnum);
+//            A = 1.6; B = 1.2; C= 0.8;
+
+            A = 2.6; B = 1.4; C= 1.2;
+            System.out.println(A+" "+B+" "+C);
+            int tmp = (int)Math.round(0.42 * graph.networkVertexnum);
             if (graph.aliveNetVerticesNum > tmp){
                 graph.aliveNetVerticesNum = tmp;
             }
 
         }else if (graph.networkVertexnum  < 500){
-            A = 1.3; B = 0.8; C=0.4;
-            int tmp = (int)Math.round(0.6 * graph.networkVertexnum);
+            A = 2.8; B = 1.4; C= 1.2;
+            System.out.println(A+" "+B+" "+C);
+            int tmp = (int)Math.round(0.4 * graph.networkVertexnum);
             if (graph.aliveNetVerticesNum > tmp){
                 graph.aliveNetVerticesNum = tmp;
             }
 
         }
         else if (500 <= graph.networkVertexnum){
-            A = 1.4; B = 0.8; C=0.4;
-            int tmp = (int)Math.round(0.55*graph.networkVertexnum);
+            A = 5; B = 1.4; C= 1.2;
+
+            System.out.println(A+" "+B+" "+C);
+            int tmp = (int)Math.round(0.28 * graph.networkVertexnum);
             if (graph.aliveNetVerticesNum > tmp){
                 graph.aliveNetVerticesNum = tmp;
             }
@@ -94,7 +100,8 @@ public class GraphProcess {
         NetworkVertex networkVertex = null;
         for (int i=0; i < graph.userAdjVertices.size(); ++i){
             networkVertex = graph.userAdjVertices.get(i);
-            networkVertex.userScore =  graph.userNeedData / networkVertex.userDatas;
+            networkVertex.userScore = networkVertex.userDatas / graph.userNeedData ;
+//            networkVertex.userScore =  graph.userNeedData / networkVertex.userDatas;
 //               1000*1.0/graph.table[i].size()*0.7 +
         }
     }

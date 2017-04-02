@@ -28,71 +28,86 @@ public class Deploy
         List dijkstraList = null;
         List mcmfList = null;
         int dijkstraCost = 0, mcmfCost = 0;
-        Graph graph = StringsUtils.readStrings(graphContent);
-        GraphProcess graphProcess = new GraphProcess(graph);
-        graphProcess.updateGraph();
 
-        int popSize = (int) Math.round(graph.aliveNetVerticesNum * 0.5);
-        if (popSize % 2 ==0)
-            popSize ++;
 
 //        System.out.println("===");
 //        System.out.println(graph.aliveNetVerticesNum);
 //        System.out.println(popSize);
 
-        double[] pm2 = {0.003, 0.005, 0.007, 0.01,0.03};
-        double[] pm0 = {0.003};
+        double[] A = {4};
+        double[] B = {1.5};
+        double[] C = {1};
 
 
         int gen = 800;
         GA ga1 = null;
 
 
-        if (graph.networkVertexnum < 250){
-            gen = 800;
-            popSize = 51;
-
-        }
-        else if (graph.networkVertexnum < 500){
-            gen = 800;
-            popSize = 41;
-
-        }
-        else {
-            gen = 800;
-            popSize = 41;
-
-        }
-
         for (int i = 0; i < 1; ++i) {
 
-            long s = System.currentTimeMillis();
-            //参数：种群大小，存活网络节点个数, 代数
-            ga1 = new GA(popSize, graph.aliveNetVerticesNum, gen, graphProcess);
+            for (double a :A){
+                for (double b: B){
+                    for (double c: C){
+
+                        Graph graph = StringsUtils.readStrings(graphContent);
+                        int popSize = (int) Math.round(graph.aliveNetVerticesNum * 0.5);
+                        if (popSize % 2 ==0)
+                            popSize ++;
+                        GraphProcess graphProcess = new GraphProcess(graph);
+
+                        if (graph.networkVertexnum < 250){
+                            gen = 650;
+                            popSize = 55;
+
+                        }
+                        else if (graph.networkVertexnum < 500){
+                            gen = 650;
+                            popSize = 55;
+                        }
+                        else {
+                            gen = 600;
+                            popSize = 41;
+                        }
+
+                        graphProcess.A = a;
+                        graphProcess.B = b;
+                        graphProcess.C = c;
+
+                        System.out.println("a: "+a+" b: "+b+" c: "+c);
+
+                        long s = System.currentTimeMillis();
+
+                        graphProcess.updateGraph();
+                        //参数：种群大小，存活网络节点个数, 代数
+                        ga1 = new GA(popSize, graph.aliveNetVerticesNum, gen, graphProcess);
 
 
-            //遗传算法寻找服务器
-            ga1.startGA();
-            dijkstraList = ga1.getBestList();
-            dijkstraCost = ga1.getBestCost();
-            System.out.print(dijkstraCost+" ");
-            System.out.println(ga1.getBestId());
+                        //遗传算法寻找服务器
+                        ga1.startGA();
+                        dijkstraList = ga1.getBestList();
+                        dijkstraCost = ga1.getBestCost();
+                        System.out.print(dijkstraCost+" ");
+                        System.out.println(ga1.getBestId());
 
 
-            //最大流找路径
-            PathCost pathCost = new PathCost(graph);
-            graph.serverIds = ga1.bestServer;
-            graphProcess.addEdges();
-            ga1.addSuperSource(ga1.bestServer);
-            System.out.println(ga1.bestServer.size());
+                        //最大流找路径
+                        PathCost pathCost = new PathCost(graph);
+                        graph.serverIds = ga1.bestServer;
+                        graphProcess.addEdges();
+                        ga1.addSuperSource(ga1.bestServer);
+                        System.out.println(ga1.bestServer.size());
 
-            mcmfCost = pathCost.minPathCost(graph.table);
-            System.out.println(mcmfCost);
-            mcmfList = pathCost.getAllPathList();
-            long e = System.currentTimeMillis();
-            System.out.println("mcmf:"+mcmfList.size());
-            System.out.println("dijkstra:"+dijkstraList.size());
-            System.out.println(e-s+"  ======");
+                        mcmfCost = pathCost.minPathCost(graph.table);
+                        System.out.println(mcmfCost);
+                        mcmfList = pathCost.getAllPathList();
+                        long e = System.currentTimeMillis();
+                        System.out.println("mcmf:"+mcmfList.size());
+                        System.out.println("dijkstra:"+dijkstraList.size());
+                        System.out.println(e-s+"  ======");
+                    }
+                }
+            }
+
         }
 
 

@@ -13,6 +13,7 @@ public class PathCost {
     private Graph graph;
     private int[] disto;
     private int[] prepath;
+    private int[] minweight;
     private int[] vertexCost;
 
 
@@ -24,6 +25,7 @@ public class PathCost {
         this.graph = graph;
         prepath = new int[graph.networkVertexnum+2];
         disto = new int[graph.networkVertexnum+2];
+        minweight = new int[graph.networkVertexnum+2];
         vertexCost = new int[graph.networkVertexnum+2];
     }
 
@@ -31,6 +33,7 @@ public class PathCost {
         for (int i=0; i < prepath.length; ++i){
             disto[i] = 100;
             prepath[i] = -1;
+            minweight[i] = 5000;
         }
     }
 
@@ -49,7 +52,8 @@ public class PathCost {
             //王权节点到汇点边权重不为0，则表明不能满足需求
             if (hashMaps[graph.kingNetworks.get(id).id].get(graph.networkVertexnum).weight != 0){
 
-           //     sumCost -= vertexCost[id] ;
+                sumCost -= vertexCost[id] ;
+                graph.serverIds.put(id, true);
                 sumCost += graph.serverValue;
             }
         }
@@ -86,6 +90,7 @@ public class PathCost {
             }
 
 
+
             edgeHashMap = hashMaps[edgeValue.start];
             if (edgeHashMap != null && flag.get(edgeValue.start) == null){
                 for (Integer id: edgeHashMap.keySet()){
@@ -99,6 +104,7 @@ public class PathCost {
                             if (flag.get(id) == null) {
                                 pq.add(new EdgeValue(id, edge.weight, disto[id]));
                             }
+                            minweight[id] = minweight[edgeValue.start] < edge.weight ? minweight[edgeValue.start] : edge.weight;
                         }
 
                     }
