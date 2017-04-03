@@ -98,7 +98,7 @@ public class GA {
     }
 
 
-    public int calFit(Population pop, int gen){
+    private int calFit(Population pop, int gen){
 
 
         graph.serverIds.clear();
@@ -140,7 +140,7 @@ public class GA {
         return sum;
     }
 
-    public boolean compareCost(int cost, List pathList, int gen){
+    private boolean compareCost(int cost, List pathList, int gen){
         if (cost < bestCost){
             System.out.println("cost: "+cost);
             System.out.println(gen);
@@ -230,32 +230,69 @@ public class GA {
 
     }
 
-    void initOnePop(Population newpop, Population[] pop, int gen){
+    private void initOnePop(Population newpop, int gen){
         int j;
-        for (j=0; j < chrom_size - explore_num; ++j) {
-            if (excise() <= 0.3) {
-                newpop.chrom[j] = 1 - newpop.chrom[j];
-            }
+//        for (j=0; j < chrom_size - explore_num; ++j) {
+//            if (excise() <= 0.2) {
+//                newpop.chrom[j] = 1 - newpop.chrom[j];
+//            }
+//
+//        }
+//        for (; j < chrom_size; ++j){
+//            if (excise() <= 0.1) {
+//                newpop.chrom[j] = 1;
+//            }
+//        }
+//        calFit(newpop, gen);
 
-        }
-        for (; j < chrom_size; ++j){
-            if (excise() <= 0.4) {
+
+        for (j=0; j < chrom_size/2; ++j) {
+            if (excise() <= 0.6) {
                 newpop.chrom[j] = 1;
             }
+            else {
+                newpop.chrom[j] = 0;
+            }
         }
-        calFit(newpop, gen);
 
+        for (; j < chrom_size; ++j) {
+            if (excise() <= 0.2) {
+                newpop.chrom[j] = 1;
+            }
+            else {
+                newpop.chrom[j] = 0;
+            }
+        }
+
+        calFit(newpop, gen);
         newpop.fitness = newpop.fitness > avgFitness ? avgFitness : newpop.fitness;
     }
 
 
-    void initPop(){
-        int i,j=0;
+    private void createOnePop(Population pop){
+        int j;
+        for (j=0; j < chrom_size/2; ++j) {
+            if (excise() <= 0.7) {
+                pop.chrom[j] = 1;
+            }
+        }
+
+        for (; j < chrom_size; ++j) {
+            if (excise() <= 0.2) {
+                pop.chrom[j] = 1;
+            }
+        }
+
+
+        calFit(pop, 0);
+    }
+
+    private void initPop(){
+        int i;
         oldPop = new Population[pop_size];
         newPop = new Population[pop_size];
 
         Population population1,population2 ;
-
 
 
         for (i=0 ; i < pop_size; ++i){
@@ -264,27 +301,18 @@ public class GA {
             oldPop[i] = population1;
             newPop[i] = population2;
 
-            for (j=0; j < chrom_size; ++j) {
-                if (excise() <= pro_init_server) {
-                    oldPop[i].chrom[j] = 1;
-                }
-            }
-
-            oldPop[i].maxServerNum++;
-
-            calFit(oldPop[i], 0);
-
+            createOnePop(oldPop[i]);
 
         }
     }
 
-    double excise(){
+    private double excise(){
         double pp;
         pp = random.nextDouble();
         return pp;
     }
 
-    int selection(){
+    private int selection(){
         double wheelPos, randNumber, partsum = 0;
         int i = 0;
 
@@ -303,7 +331,7 @@ public class GA {
 
 
 
-    boolean crossOver(int[] parent1, int[] parent2, int chr1, int chr2){
+    private boolean crossOver(int[] parent1, int[] parent2, int chr1, int chr2){
         int j;
         int crossPos1, crossPos2;
         if (excise() <= pro_cross){
@@ -336,41 +364,10 @@ public class GA {
 
     }
 
-    boolean oneCrossOver(int[] parent1, int[] parent2, int chr1, int chr2){
-        int j;
-        int crossPos1, crossPos2;
-        if (excise() <= pro_cross){
-            crossPos1 = random.nextInt(chrom_size);
-
-
-            for (j = 0; j <= crossPos1; ++j){
-                newPop[chr1].chrom[j] = parent1[j];
-                newPop[chr2].chrom[j] = parent2[j];
-            }
-
-            for (; j < chrom_size; ++j){
-                newPop[chr1].chrom[j] = parent2[j];
-                newPop[chr2].chrom[j] = parent1[j];
-            }
-
-            return true;
-        }
-        return false;
-
-    }
-
-    int mutation( int alleles){
-
-        if (excise() <= pro_mutate) {
-            return 1 - alleles;
-        }
-        return alleles;
-
-    }
 
 
 
-    void twoBinaryMutation(Population newPop){
+    private void twoBinaryMutation(Population newPop){
 
         for (int i=0; i < chrom_size; ++i) {
             if (excise() <= pro_mutate) {
@@ -400,7 +397,7 @@ public class GA {
 
     }
 
-    void exploreChrome(Population[] pop, Population[] oldPop){
+    private void exploreChrome(Population[] pop, Population[] oldPop){
 
         if (chrom_size < max_explore_num) {
             Population population, oldPopulation;
@@ -432,7 +429,7 @@ public class GA {
         }
     }
 
-    void generation(int gen){
+    private void generation(int gen){
         int mate1,mate2;
 
 
@@ -472,12 +469,12 @@ public class GA {
 
     }
 
-    void initParamter(){
+    private void initParamter(){
         if (graph.networkVertexnum < 250){
 
-            max_explore_num = (int) (graph.networkVertexnum * 0.5);
-            explore_num = 10;
-            maxStagnateNum = 50;
+            max_explore_num = (int) (graph.networkVertexnum * 0.52);
+            explore_num = 20;
+            maxStagnateNum = 15;
 
             this.pm0 = 0.005;
             this.pm1 = 0.007;
@@ -493,8 +490,8 @@ public class GA {
         else if (graph.networkVertexnum < 500){
 
             max_explore_num = (int) (graph.networkVertexnum * 0.5);
-            explore_num = 20;
-            maxStagnateNum = 40;
+            explore_num = 25;
+            maxStagnateNum = 12;
 
             this.pm0 = 0.003;
             this.pm1 = 0.007;
@@ -558,7 +555,7 @@ public class GA {
                 break;
             }
 
-            if (gen % 2 == 0 && flag){
+            if (flag && gen % 2 == 0){
                 graph.shuffleUseradjVertice(graph.userAdjVertices);
             }
 
@@ -584,15 +581,15 @@ public class GA {
 
 
             if (stagnateNum > maxStagnateNum && gen > 100){
-                maxStagnateNum += 10;
+                maxStagnateNum += 5;
                 stagnateNum = 0;
                 Arrays.sort(newPop);
 
                 System.out.println("---bbbbbbbbbbbbbbbbbb---");
                 System.out.println("chromesize: "+chrom_size);
                 exploreChrome(newPop, oldPop);
-                for (int k=0; k < 10 ; ++k) {
-                    initOnePop(newPop[ pop_size - k -1], newPop, gen);
+                for (int k=0; k < pop_size / 2 ; ++k) {
+                    initOnePop(newPop[ pop_size - k -1], gen);
                 }
 
                 for (int j = 0; j < pop_size; ++j){

@@ -35,7 +35,7 @@ public class Deploy
 //        System.out.println(popSize);
 
         double[] A = {4};
-        double[] B = {1.5};
+        double[] B = {1};
         double[] C = {1};
 
 
@@ -56,12 +56,12 @@ public class Deploy
                         GraphProcess graphProcess = new GraphProcess(graph);
 
                         if (graph.networkVertexnum < 250){
-                            gen = 650;
-                            popSize = 55;
+                            gen = 600;
+                            popSize = 75;
 
                         }
                         else if (graph.networkVertexnum < 500){
-                            gen = 650;
+                            gen = 600;
                             popSize = 55;
                         }
                         else {
@@ -90,12 +90,20 @@ public class Deploy
                         System.out.println(ga1.getBestId());
 
 
+                        System.out.println(ga1.oldPop[0]);
+
+
                         //最大流找路径
                         PathCost pathCost = new PathCost(graph);
                         graph.serverIds = ga1.bestServer;
                         graphProcess.addEdges();
+//                        ga1.addSuperSource(ga1.bestServer);
                         ga1.addSuperSource(ga1.bestServer);
                         System.out.println(ga1.bestServer.size());
+
+                        for (Integer id: graph.serverIds.keySet())
+                            System.out.print(id+" ");
+                        System.out.println();
 
                         mcmfCost = pathCost.minPathCost(graph.table);
                         System.out.println(mcmfCost);

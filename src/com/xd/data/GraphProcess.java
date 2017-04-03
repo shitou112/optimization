@@ -48,7 +48,7 @@ public class GraphProcess {
 //        dataSortUserAdjVertices();
 //
 //        int i=0;
-//
+////
 //        for (NetworkVertex networkVertex: graph.getNetworkVertices()){
 //            System.out.println((i++)+"   "+networkVertex);
 //        }
@@ -64,29 +64,30 @@ public class GraphProcess {
                 graph.aliveNetVerticesNum = tmp;
             }
         }else if (graph.networkVertexnum  < 200){
-//            A = 1.6; B = 1.2; C= 0.8;
 
-            A = 2.6; B = 1.4; C= 1.2;
+//            A = 2.6; B = 1.4; C= 1.2;
+            A = 4; B = 1.4; C= 1;
+            System.out.println(A+" "+B+" "+C);
+            int tmp = (int)Math.round(0.44 * graph.networkVertexnum);
+            if (graph.aliveNetVerticesNum > tmp){
+                graph.aliveNetVerticesNum = tmp;
+            }
+
+        }else if (graph.networkVertexnum  < 500){
+            A = 5.6; B = 1.4; C= 1.2;
             System.out.println(A+" "+B+" "+C);
             int tmp = (int)Math.round(0.42 * graph.networkVertexnum);
             if (graph.aliveNetVerticesNum > tmp){
                 graph.aliveNetVerticesNum = tmp;
             }
 
-        }else if (graph.networkVertexnum  < 500){
-            A = 2.8; B = 1.4; C= 1.2;
-            System.out.println(A+" "+B+" "+C);
-            int tmp = (int)Math.round(0.4 * graph.networkVertexnum);
-            if (graph.aliveNetVerticesNum > tmp){
-                graph.aliveNetVerticesNum = tmp;
-            }
-
         }
         else if (500 <= graph.networkVertexnum){
-            A = 5; B = 1.4; C= 1.2;
+            A = 5.6; B = 1.4; C= 1.1;
+//            A = 10; B = 2; C= 1.5;
 
             System.out.println(A+" "+B+" "+C);
-            int tmp = (int)Math.round(0.28 * graph.networkVertexnum);
+            int tmp = (int)Math.round(0.3 * graph.networkVertexnum);
             if (graph.aliveNetVerticesNum > tmp){
                 graph.aliveNetVerticesNum = tmp;
             }
@@ -100,8 +101,8 @@ public class GraphProcess {
         NetworkVertex networkVertex = null;
         for (int i=0; i < graph.userAdjVertices.size(); ++i){
             networkVertex = graph.userAdjVertices.get(i);
-            networkVertex.userScore = networkVertex.userDatas / graph.userNeedData ;
-//            networkVertex.userScore =  graph.userNeedData / networkVertex.userDatas;
+//            networkVertex.userScore = networkVertex.userDatas / graph.userNeedData ;
+            networkVertex.userScore =  graph.userNeedData / networkVertex.userDatas;
 //               1000*1.0/graph.table[i].size()*0.7 +
         }
     }
@@ -163,6 +164,9 @@ public class GraphProcess {
 
     }
 
+    /**
+     * graph.networkVertexnum是汇点
+     */
     public void addEdges(){
         graph.table = new HashMap[graph.networkVertexnum+2];
 
@@ -175,6 +179,21 @@ public class GraphProcess {
         }
     }
 
+
+    /**
+     * graph.networkVertexnum是源点
+     */
+    public void addSourceEdges(){
+        graph.table = new HashMap[graph.networkVertexnum+2];
+
+        for (Edge edge: graph.getEdges()){
+            graph.add(new Edge(edge.v, edge.w, edge.weight, edge.money));
+            graph.add(new Edge(edge.w,edge.v,edge.weight,edge.money));
+        }
+        for (Integer id:graph.kingNetworks.keySet()){
+            graph.add(new Edge(graph.networkVertexnum, id, graph.kingNetworks.get(id).userDatas, 0));
+        }
+    }
 
 
 
